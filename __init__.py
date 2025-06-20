@@ -1,55 +1,59 @@
 import bpy
 
-addon_name = "my_test_addon"
+addon_name_for_log = "GPCC"
 addon_id_b = "GPCC"
 addon_id_s = "gpcc"
 
 bl_info = {
-    "name": "my test addon",
+    "name": "GPCC",
     "author": "Fumiya Funatsu",
     "version": (0, 1),
     "blender": (2, 80, 0),
-    "description": "create ico sphere",
+    "description": "convert grease pencil into colored curve",
     "category": "Object"
 }
 
-def b_print(data):
-    for window in bpy.context.window_manager.windows:
-        screen = window.screen
-        for area in screen.areas:
-            if area.type == 'CONSOLE':
-                override = {'window': window, 'screen': screen, 'area': area}
-                bpy.ops.console.scrollback_append(override, text=str(data), type="OUTPUT")   
+# def b_print(data):
+#     for window in bpy.context.window_manager.windows:
+#         screen = window.screen
+#         for area in screen.areas:
+#             if area.type == 'CONSOLE':
+#                 override = {'window': window, 'screen': screen, 'area': area}
+#                 bpy.ops.console.scrollback_append(override, text=str(data), type="OUTPUT")   
 
 def log(s):
-    b_print(f"[{addon_name}]: {s}")
+    print(f"[{addon_name_for_log}]: {s}")
 
-class GPCC_OT_CreateObject(bpy.types.Operator):
+class GPCC_OT_ConvertGP2Curves(bpy.types.Operator):
 
-    bl_idname = f"{addon_id_s}.createobject"
-    bl_label = "ico_sphere"
-    bl_description = "create ico sphere"
+    bl_idname = f"{addon_id_s}.convert_gp_to_curves"
+    bl_label = "gp_to_curves"
+    bl_description = "convert grease pencil into curves"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        bpy.ops.mesh.primitive_ico_sphere_add()
-        log("created ico sphere")
+        # bpy.ops.mesh.primitive_ico_sphere_add()
+        # log("created ico sphere")
+
+        sel = bpy.context.selected_objects
+        log(sel)
 
         return {'FINISHED'}
-
+    
+gp2curves = GPCC_OT_ConvertGP2Curves
 
 def menu_fn(self, context):
     self.layout.separator()
-    self.layout.operator(GPCC_OT_CreateObject.bl_idname)
+    self.layout.operator(gp2curves.bl_idname)
 
 def register():
-    bpy.utils.register_class(GPCC_OT_CreateObject)
+    bpy.utils.register_class(gp2curves)
     bpy.types.VIEW3D_MT_add.append(menu_fn)
     log("registered")
 
 def unregister():
     bpy.types.VIEW3D_MT_add.remove(menu_fn)
-    bpy.utils.unregister_class(GPCC_OT_CreateObject)
+    bpy.utils.unregister_class(gp2curves)
     log("unregistered")
 
 if __name__ == "__main__":
