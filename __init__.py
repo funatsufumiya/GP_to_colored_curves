@@ -32,13 +32,29 @@ class GPCC_OT_ConvertGP2Curves(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
+        break_ret = {'FINISHED'}
+        last_ret = {'FINISHED'}
         # bpy.ops.mesh.primitive_ico_sphere_add()
         # log("created ico sphere")
 
-        sel = bpy.context.selected_objects
-        log(sel)
+        sels = bpy.context.selected_objects
+        # log(sel)
 
-        return {'FINISHED'}
+        if len(sels) < 1:
+            return break_ret
+        
+        sel = sels[0]
+        obj_type = sel.type
+        
+        # log(type(sel))
+        log(obj_type)
+
+        if obj_type != "GPENCIL":
+            return break_ret
+        
+        log("yeah! gpencil!")
+
+        return last_ret
     
 gp2curves = GPCC_OT_ConvertGP2Curves
 
