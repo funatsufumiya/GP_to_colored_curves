@@ -37,6 +37,8 @@ class GPCC_OT_ConvertGP2Curves(bpy.types.Operator):
         # bpy.ops.mesh.primitive_ico_sphere_add()
         # log("created ico sphere")
 
+        frame_current = bpy.context.scene.frame_current
+
         sels = bpy.context.selected_objects
         # log(sel)
 
@@ -53,6 +55,41 @@ class GPCC_OT_ConvertGP2Curves(bpy.types.Operator):
             return break_ret
         
         log("yeah! gpencil!")
+
+        # log(dir(sel.data))
+
+        name = sel.data.name
+        layers = sel.data.layers
+
+        log(f"name: {name}")
+        log(f"layers: {layers}")
+
+        if len(layers) > 0:
+            layer = layers[0]
+            log(f"layer0: {layer}")
+            # log(f"layer0 dir: {dir(layer0)}")
+            log(f"frames: {layer.frames}")
+            if len(layer.frames) > 0:
+                # get frame at current frame, by where condition
+                frames_match = list(filter(lambda f: f.frame_number == frame_current, layer.frames))
+                if len(frames_match) > 0:
+                    frame = frames_match[0]
+                    log(f"frame: {frame}")
+                    # log(f"frame dir: {dir(frame)}")
+                    log(f"strokes: {frame.strokes}")
+                    log(f"strokes dir: {dir(frame.strokes)}")
+                    log(f"strokes values: {frame.strokes.values()}")
+                    # log(f"frame number : {frame.frame_number}")
+                    # log(f"frame_current: {frame_current}")
+
+                    # gp_frame = layer.frames[bpy.context.scene.frame_current]
+
+                    # log(f"gp_frame: {gp_frame}")
+
+                    # vertices = sel.data.vertices
+                    # v0 = vertices
+                    # coords = [(v0.matrix_world @ v0.co) for v in vertices]
+                    # log(coords)
 
         return last_ret
     
