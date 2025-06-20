@@ -1,4 +1,4 @@
-import bpy   # アドオン開発者に対して用意しているAPIを利用する
+import bpy
 
 addon_name = "my_test_addon"
 
