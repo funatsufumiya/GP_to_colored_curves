@@ -77,19 +77,19 @@ class GPCC_OT_ConvertGP2Curves(bpy.types.Operator):
                     log(f"frame: {frame}")
                     # log(f"frame dir: {dir(frame)}")
                     log(f"strokes: {frame.strokes}")
-                    log(f"strokes dir: {dir(frame.strokes)}")
-                    log(f"strokes values: {frame.strokes.values()}")
-                    # log(f"frame number : {frame.frame_number}")
-                    # log(f"frame_current: {frame_current}")
+                    # log(f"strokes dir: {dir(frame.strokes)}")
+                    # log(f"strokes values: {frame.strokes.values()}")
 
-                    # gp_frame = layer.frames[bpy.context.scene.frame_current]
+                    strokes = frame.strokes.values()
 
-                    # log(f"gp_frame: {gp_frame}")
+                    for stroke in strokes:
+                        log(f"stroke: {stroke}")
+                        cs = [p.co for p in stroke.points.values()]
+                        log(f"points: {cs}")
 
-                    # vertices = sel.data.vertices
-                    # v0 = vertices
-                    # coords = [(v0.matrix_world @ v0.co) for v in vertices]
-                    # log(coords)
+                        # c0 = cs[0]
+                        # coords = [(stroke.points.matrix_world @ c) for c in cs]
+                        # log(coords)
 
         return last_ret
     
