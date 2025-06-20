@@ -1,27 +1,32 @@
 import bpy
 
 addon_name = "my_test_addon"
+addon_id_b = "GPCC"
+addon_id_s = "gpcc"
 
 bl_info = {
-    "name": addon_name,
+    "name": "my test addon",
     "author": "Fumiya Funatsu",
     "version": (0, 1),
-    "blender": (4, 2, 0),
-    "location": "3D View > Add > Mesh",
+    "blender": (2, 80, 0),
     "description": "create ico sphere",
-    "warning": "",
-    "support": "TESTING",
-    "wiki_url": "",
-    "tracker_url": "",
     "category": "Object"
 }
 
+def b_print(data):
+    for window in bpy.context.window_manager.windows:
+        screen = window.screen
+        for area in screen.areas:
+            if area.type == 'CONSOLE':
+                override = {'window': window, 'screen': screen, 'area': area}
+                bpy.ops.console.scrollback_append(override, text=str(data), type="OUTPUT")   
+
 def log(s):
-    print(f"[{addon_name}]: {s}")
+    b_print(f"[{addon_name}]: {s}")
 
-class CreateObject(bpy.types.Operator):
+class GPCC_OT_CreateObject(bpy.types.Operator):
 
-    bl_idname = "object.create_object"
+    bl_idname = f"{addon_id_s}.createobject"
     bl_label = "ico_sphere"
     bl_description = "create ico sphere"
     bl_options = {'REGISTER', 'UNDO'}
@@ -35,16 +40,16 @@ class CreateObject(bpy.types.Operator):
 
 def menu_fn(self, context):
     self.layout.separator()
-    self.layout.operator(CreateObject.bl_idname)
+    self.layout.operator(GPCC_OT_CreateObject.bl_idname)
 
 def register():
-    bpy.utils.register_module(addon_name)
-    bpy.types.INFO_MT_mesh_add.append(menu_fn)
+    bpy.utils.register_class(GPCC_OT_CreateObject)
+    bpy.types.VIEW3D_MT_add.append(menu_fn)
     log("registered")
 
 def unregister():
-    bpy.types.INFO_MT_mesh_add.remove(menu_fn)
-    bpy.utils.unregister_module(addon_name)
+    bpy.types.VIEW3D_MT_add.remove(menu_fn)
+    bpy.utils.unregister_class(GPCC_OT_CreateObject)
     log("unregistered")
 
 if __name__ == "__main__":
