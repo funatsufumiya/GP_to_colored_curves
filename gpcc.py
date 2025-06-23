@@ -1,4 +1,6 @@
 import bpy
+import os
+import datetime
 
 addon_name_for_log = "GPCC"
 addon_id_b = "GPCC"
@@ -14,6 +16,11 @@ addon_id_s = "gpcc"
 
 def log(s):
     print(f"[{addon_name_for_log}]: {s}")
+
+def version():
+    _stat = os.stat(__file__)
+    dt = datetime.datetime.fromtimestamp(_stat.st_mtime)
+    return dt.strftime('%Y/%m/%d %H:%M:%S.%f')
 
 def gp2curves():
     break_ret = {'FINISHED'}

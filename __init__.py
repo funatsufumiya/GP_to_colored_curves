@@ -1,20 +1,21 @@
 bl_info = {
     "name": "GPCC",
     "author": "Fumiya Funatsu",
-    "version": (0, 1, 0, 2),
+    "version": (0, 1, 0),
     "blender": (2, 80, 0),
     "description": "convert grease pencil into colored curve",
     "category": "Object"
 }
 
 import bpy
-import importlib
 import addon_utils
+
+import importlib
 if "gpcc" in locals():    
     importlib.reload(gpcc)    
     
 from . import gpcc
-    
+
 gp2curves = gpcc.GPCC_OT_ConvertGP2Curves
 log = gpcc.log
 
