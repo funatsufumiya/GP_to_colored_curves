@@ -34,12 +34,12 @@ def register():
         unregister()
     bpy.utils.register_class(gp2curves)
     bpy.types.VIEW3D_MT_add.append(menu_fn)
-    log("registered")
+    # log("registered")
 
 def unregister():
     bpy.types.VIEW3D_MT_add.remove(menu_fn)
     bpy.utils.unregister_class(gp2curves)
-    log("unregistered")
+    # log("unregistered")
 
 if __name__ == "__main__":
     register()

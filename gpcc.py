@@ -3,7 +3,7 @@ import os
 import datetime
 import numpy as np
 import mathutils
-from mathutils import Vector
+from mathutils import Vector, Quaternion, Euler
 from bpy.types import Context
 from typing import List
 
@@ -37,12 +37,13 @@ def make_empty(name: str, location: Vector, context: Context):
     empty_obj.location = location
     return empty_obj
 
-def make_curves(name: str, location: Vector, coords: List[Vector], context: Context):
-    # # WORKAROUND: ignore the last coords
-    # coords = coords[:-1]
-    # # ignore first coords
-    # coords = coords[1:]
-
+def make_curves(
+        name: str,
+        location: Vector,
+        rotation_euler: Euler,
+        scale: Vector,
+        coords: List[Vector], context: Context
+    ):
     curveData = bpy.data.curves.new(name, type='CURVE')
     curveData.dimensions = '3D'
     curveData.resolution_u = 2
@@ -56,6 +57,8 @@ def make_curves(name: str, location: Vector, coords: List[Vector], context: Cont
     curveData.bevel_depth = 0.01
     context.collection.objects.link(curveObj)
     curveObj.location = location
+    curveObj.rotation_euler = rotation_euler
+    curveObj.scale = scale
     return curveObj
 
 def gp2curves():
@@ -73,44 +76,50 @@ def gp2curves():
         return break_ret
     
     sel = sels[0]
+    # obj_name = sel.name
+    obj_location = sel.location
+    obj_rot_euler = sel.rotation_euler
+    obj_scale = sel.scale
     obj_type = sel.type
+
+    # log(f"rot_quat: {obj_rot_quat}")
     
-    # log(type(sel))
-    log(obj_type)
+    ## log(type(sel))
+    # log(obj_type)
 
     if obj_type != "GPENCIL":
         return break_ret
     
-    log("yeah! gpencil!")
+    # log("yeah! gpencil!")
 
     # log(dir(sel.data))
 
     name = sel.data.name
     layers = sel.data.layers
 
-    log(f"name: {name}")
-    log(f"layers: {layers}")
+    # log(f"name: {name}")
+    # log(f"layers: {layers}")
 
     if len(layers) > 0:
         layer = layers[0]
-        log(f"layer0: {layer}")
-        # log(f"layer0 dir: {dir(layer0)}")
-        log(f"frames: {layer.frames}")
+        # log(f"layer0: {layer}")
+        ## log(f"layer0 dir: {dir(layer0)}")
+        # log(f"frames: {layer.frames}")
         if len(layer.frames) > 0:
             # get frame at current frame, by where condition
             frames_match = list(filter(lambda f: f.frame_number == frame_current, layer.frames))
             if len(frames_match) > 0:
                 frame = frames_match[0]
-                log(f"frame: {frame}")
-                # log(f"frame dir: {dir(frame)}")
-                log(f"strokes: {frame.strokes}")
-                # log(f"strokes dir: {dir(frame.strokes)}")
-                # log(f"strokes values: {frame.strokes.values()}")
+                # log(f"frame: {frame}")
+                ## log(f"frame dir: {dir(frame)}")
+                # log(f"strokes: {frame.strokes}")
+                ## log(f"strokes dir: {dir(frame.strokes)}")
+                ## log(f"strokes values: {frame.strokes.values()}")
 
                 strokes = frame.strokes.values()
 
                 for stroke in strokes:
-                    log(f"stroke: {stroke}")
+                    # log(f"stroke: {stroke}")
                     cs = [p.co for p in stroke.points.values()]
                     # log(f"points: {cs}")
 
@@ -128,11 +137,17 @@ def gp2curves():
                     # make_empty("test_empty", center_point, bpy.context)
 
                     # make curves
+                    # FIXME: apply other matrix (other than location)
 
-                    # FIXME: curve location
-                    curve_location = Vector([0, 0, 0])
-
-                    make_curves("test_curve", curve_location, cs, bpy.context)
+                    curve_location = obj_location
+                    curve_rot_euler = obj_rot_euler
+                    curve_scale = obj_scale
+                    make_curves(
+                        f"Curve_{name}",
+                        curve_location,
+                        curve_rot_euler,
+                        curve_scale,
+                        cs, bpy.context)
 
                     # c0 = cs[0]
                     # coords = [(stroke.points.matrix_world @ c) for c in cs]
