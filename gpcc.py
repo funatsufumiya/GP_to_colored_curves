@@ -4,6 +4,8 @@ import datetime
 import numpy as np
 import mathutils
 from mathutils import Vector
+from bpy.types import Context
+from typing import List
 
 addon_name_for_log = "GPCC"
 addon_id_b = "GPCC"
@@ -26,7 +28,7 @@ def version():
     return dt.strftime('%Y/%m/%d %H:%M:%S.%f')
 
 # https://blender.stackexchange.com/questions/51290/how-to-add-empty-object-not-using-bpy-ops
-def make_empty(name, location, context): #string, vector, context #string of existing coll
+def make_empty(name: str, location: Vector, context: Context):
     empty_obj = bpy.data.objects.new( "empty", None, )
     empty_obj.name = name
     empty_obj.empty_display_size = 1 
@@ -34,6 +36,22 @@ def make_empty(name, location, context): #string, vector, context #string of exi
     context.collection.objects.link(empty_obj)
     empty_obj.location = location
     return empty_obj
+
+def make_curves(name: str, location: Vector, coords: List[Vector], context: Context):
+    curveData = bpy.data.curves.new(name, type='CURVE')
+    curveData.dimensions = '3D'
+    curveData.resolution_u = 2
+    polyline = curveData.splines.new('POLY')
+    polyline.points.add(len(coords))
+    for i, coord in enumerate(coords):
+        x,y,z = coord
+        polyline.points[i].co = (x, y, z, 1)
+
+    curveObj = bpy.data.objects.new(name, curveData)
+    curveData.bevel_depth = 0.01
+    context.collection.objects.link(curveObj)
+    curveObj.location = location
+    return curveObj
 
 def gp2curves():
     break_ret = {'FINISHED'}
@@ -91,18 +109,25 @@ def gp2curves():
                     cs = [p.co for p in stroke.points.values()]
                     # log(f"points: {cs}")
 
-                    # make empty at center point
-                    # FIXME: this point is relative to object transform
-                    center_point = Vector([
-                        np.mean([c.x for c in cs]),
-                        np.mean([c.y for c in cs]),
-                        np.mean([c.z for c in cs]),
-                    ])
-                    log(f"p0: {cs[0]}")
-                    log(f"p0 (x, y, z): {cs[0].x}, {cs[0].y}, {cs[0].z}")
-                    log(f"center_point: {center_point}")
+                    # # make empty at center point
+                    # # FIXME: this point is relative to object transform
+                    # center_point = Vector([
+                    #     np.mean([c.x for c in cs]),
+                    #     np.mean([c.y for c in cs]),
+                    #     np.mean([c.z for c in cs]),
+                    # ])
+                    # log(f"p0: {cs[0]}")
+                    # log(f"p0 (x, y, z): {cs[0].x}, {cs[0].y}, {cs[0].z}")
+                    # log(f"center_point: {center_point}")
 
-                    make_empty("test_empty", center_point, bpy.context)
+                    # make_empty("test_empty", center_point, bpy.context)
+
+                    # make curves
+
+                    # FIXME: curve location
+                    curve_location = Vector([0, 0, 0])
+
+                    make_curves("test_curve", curve_location, cs, bpy.context)
 
                     # c0 = cs[0]
                     # coords = [(stroke.points.matrix_world @ c) for c in cs]
