@@ -1,6 +1,9 @@
 import bpy
 import os
 import datetime
+import numpy as np
+import mathutils
+from mathutils import Vector
 
 addon_name_for_log = "GPCC"
 addon_id_b = "GPCC"
@@ -21,6 +24,16 @@ def version():
     _stat = os.stat(__file__)
     dt = datetime.datetime.fromtimestamp(_stat.st_mtime)
     return dt.strftime('%Y/%m/%d %H:%M:%S.%f')
+
+# https://blender.stackexchange.com/questions/51290/how-to-add-empty-object-not-using-bpy-ops
+def make_empty(name, location, context): #string, vector, context #string of existing coll
+    empty_obj = bpy.data.objects.new( "empty", None, )
+    empty_obj.name = name
+    empty_obj.empty_display_size = 1 
+    # bpy.data.collections[coll_name].objects.link(empty_obj)
+    context.collection.objects.link(empty_obj)
+    empty_obj.location = location
+    return empty_obj
 
 def gp2curves():
     break_ret = {'FINISHED'}
@@ -76,7 +89,20 @@ def gp2curves():
                 for stroke in strokes:
                     log(f"stroke: {stroke}")
                     cs = [p.co for p in stroke.points.values()]
-                    log(f"points: {cs}")
+                    # log(f"points: {cs}")
+
+                    # make empty at center point
+                    # FIXME: this point is relative to object transform
+                    center_point = Vector([
+                        np.mean([c.x for c in cs]),
+                        np.mean([c.y for c in cs]),
+                        np.mean([c.z for c in cs]),
+                    ])
+                    log(f"p0: {cs[0]}")
+                    log(f"p0 (x, y, z): {cs[0].x}, {cs[0].y}, {cs[0].z}")
+                    log(f"center_point: {center_point}")
+
+                    make_empty("test_empty", center_point, bpy.context)
 
                     # c0 = cs[0]
                     # coords = [(stroke.points.matrix_world @ c) for c in cs]
