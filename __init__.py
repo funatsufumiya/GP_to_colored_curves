@@ -12,7 +12,7 @@ import addon_utils
 
 import importlib
 if "gpcc" in locals():    
-    importlib.reload(gpcc)    
+    importlib.reload(gpcc)
     
 from . import gpcc
 
