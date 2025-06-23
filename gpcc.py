@@ -38,11 +38,16 @@ def make_empty(name: str, location: Vector, context: Context):
     return empty_obj
 
 def make_curves(name: str, location: Vector, coords: List[Vector], context: Context):
+    # # WORKAROUND: ignore the last coords
+    # coords = coords[:-1]
+    # # ignore first coords
+    # coords = coords[1:]
+
     curveData = bpy.data.curves.new(name, type='CURVE')
     curveData.dimensions = '3D'
     curveData.resolution_u = 2
     polyline = curveData.splines.new('POLY')
-    polyline.points.add(len(coords))
+    polyline.points.add(len(coords)-1)
     for i, coord in enumerate(coords):
         x,y,z = coord
         polyline.points[i].co = (x, y, z, 1)

@@ -1,7 +1,7 @@
 bl_info = {
     "name": "GPCC",
     "author": "Fumiya Funatsu",
-    "version": (0, 1, 0),
+    "version": (0, 1, 1),
     "blender": (2, 80, 0),
     "description": "convert grease pencil into colored curve",
     "category": "Object"
