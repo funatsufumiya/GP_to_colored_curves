@@ -99,7 +99,6 @@ def convertCurveToMesh(
 # https://blender.stackexchange.com/a/131042/165377
 def color_to_vertices(
         meshObj: Object,
-        color: List[float]
     ):
     # mesh = bpy.context.active_object.data
     assert meshObj.type == "MESH"
@@ -112,20 +111,20 @@ def color_to_vertices(
     else:
        color_layer = mesh.attributes.active_color
 
-    selected_verts = []
-    for vert in mesh.vertices:
-        if vert.select == True:
-            selected_verts.append(vert)
+    # for polygon in mesh.polygons:
+    #     for i, index in enumerate(polygon.vertices):
+    #         loop_index = polygon.loop_indices[i]
+    #         # mesh.vertex_colors.active.data[loop_index].color = color
+    #         color_layer.data[loop_index].color = random_color()
 
-    for polygon in mesh.polygons:
-        for selected_vert in selected_verts:
-            for i, index in enumerate(polygon.vertices):
-                if selected_vert.index == index:
-                    loop_index = polygon.loop_indices[i]
-                    # mesh.vertex_colors.active.data[loop_index].color = color
-                    color_layer.data[loop_index].color = color
+    for i in range(len(color_layer.data)):
+        color_layer.data[i].color = random_color()
 
     # bpy.ops.object.mode_set(mode = 'EDIT')
+
+def random_color():
+    r,g,b = [random.uniform(0, 1) for i in range(3)]
+    return [r, g, b, 1.0]
 
 def gp2curves():
     break_ret = {'FINISHED'}
@@ -220,9 +219,7 @@ def gp2curves():
                     meshObj = convertCurveToMesh(curveObj=curveObj, context=bpy.context)
                     selectObject(meshObj)
 
-                    r,g,b = [random.uniform(0,1) for i in range(3)]
-                    RGBA = [r,g,b,1]
-                    color_to_vertices(meshObj, RGBA)
+                    color_to_vertices(meshObj)
                     # color_to_vertices(color=RGB)
 
     return last_ret
