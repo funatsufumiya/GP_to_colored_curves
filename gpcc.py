@@ -121,7 +121,14 @@ def color_to_vertices(
     # for i in range(len(color_layer.data)):
     #     color_layer.data[i].color = random_color()
 
-def color_to_vertices_from_gp(meshObj: Object, gp_vertex_colors: List[bpy_prop_array]):
+def rgb_to_rgba(rgb: bpy_prop_array, alpha: float) -> list[float]:
+    """
+    Convert RGB color to RGBA by adding an alpha channel.
+    """
+    c = list(rgb)
+    return [c[0], c[1], c[2], alpha]
+
+def color_to_vertices_from_gp(meshObj: Object, gp_vertex_colors: List[bpy_prop_array], alphas: List[float]):
     mesh = meshObj.data
     if not mesh.attributes.active_color:
         color_layer = mesh.color_attributes.new("Col", 'FLOAT_COLOR', 'POINT')
@@ -134,7 +141,8 @@ def color_to_vertices_from_gp(meshObj: Object, gp_vertex_colors: List[bpy_prop_a
     for i, v in enumerate(mesh.vertices):
         # match index linear (assuming the same order)
         idx = int(mapv(i, 0, n_dst-1, 0, n_src-1))
-        color_layer.data[i].color = gp_vertex_colors[idx]
+        # color_layer.data[i].color = gp_vertex_colors[idx]
+        color_layer.data[i].color = rgb_to_rgba(gp_vertex_colors[idx], alphas[idx])
 
 def mapv(v: float, vmin: float, vmax: float, tmin: float, tmax: float):
     """
@@ -214,6 +222,7 @@ def gp2curves():
                     # log(f"stroke: {stroke}")
                     cs = [p.co for p in stroke.points.values()]
                     vcs = [p.vertex_color for p in stroke.points.values()]
+                    alphas = [p.strength for p in stroke.points.values()]
                     pressures = [p.pressure for p in stroke.points.values()]
                     thickness_factor = 0.05
                     thicknesses = np.array(pressures) * float(stroke.line_width) * thickness_factor
@@ -246,7 +255,7 @@ def gp2curves():
                     selectObject(meshObj)
 
                     # color_to_vertices(meshObj)
-                    color_to_vertices_from_gp(meshObj, vcs)
+                    color_to_vertices_from_gp(meshObj, vcs, alphas)
 
     return last_ret
 
