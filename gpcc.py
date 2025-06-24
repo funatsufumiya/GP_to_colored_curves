@@ -180,6 +180,7 @@ def gp2curves():
     layers = sel.data.layers
 
     if len(layers) > 0:
+        # FIXME: should also consider other layers
         layer = layers[0]
         if len(layer.frames) > 0:
             frames_match = list(filter(lambda f: f.frame_number == frame_current, layer.frames))
