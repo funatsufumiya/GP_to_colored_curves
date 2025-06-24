@@ -37,6 +37,7 @@ Download whole code from GitHub's "Download ZIP" menu, and rename it to "GP to C
 ## TODOs
 
 - Adjust multiplication factor from pixels to radius (Blender 4.2 LTS)
+- Curve export function (alternative menu, without vertex-color)
 - Curve profile adjustment
 - Support more GP_Layers...?
 - Support fills in addition to strokes...?
