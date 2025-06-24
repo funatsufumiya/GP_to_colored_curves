@@ -156,7 +156,8 @@ def gp2curves():
                     cs = [p.co for p in stroke.points.values()]
                     vcs = [p.vertex_color for p in stroke.points.values()]
                     pressures = [p.pressure for p in stroke.points.values()]
-                    thicknesses = pressures * stroke.line_width
+                    thickness_factor = 0.05
+                    thicknesses = np.array(pressures) * float(stroke.line_width) * thickness_factor
                     # log(f"points: {cs}")
 
                     # # make empty at center point
