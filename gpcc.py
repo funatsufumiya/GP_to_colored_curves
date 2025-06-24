@@ -12,7 +12,7 @@ import datetime
 import numpy as np
 import mathutils
 from mathutils import Vector, Quaternion, Euler, Matrix
-from bpy.types import Context, bpy_prop_array, Object
+from bpy.types import Context, bpy_prop_array, Object, Operator
 from typing import List
 import random
 
@@ -181,9 +181,21 @@ def get_thickness_factor_gpv3():
     except Exception:
         return 100.0
 
-def gp2curves(convert_to_meshes: bool, with_radius: bool):
-    break_ret = {'FINISHED'}
+def gp2curves(convert_to_meshes: bool, with_radius: bool, caller: Operator | None):
+    break_ret = {'CANCELLED'}
     last_ret = {'FINISHED'}
+
+    # log(f"caller: {caller}")
+    # log(f"caller type: {type(caller)}")
+    # log(f"caller is Operator: {isinstance(caller, Operator)}")
+
+    def warn(s):
+        if caller is None:
+            log(f"[Warning] {s}")
+        else:
+            caller.report({'ERROR_INVALID_INPUT'}, s)
+            bpy.context.window_manager.popup_menu(s, title="Error", icon='ERROR')
+            log(f"[Warning] {s}")
 
     frame_current = bpy.context.scene.frame_current
 
@@ -201,65 +213,79 @@ def gp2curves(convert_to_meshes: bool, with_radius: bool):
     is_gp = (is_gpv2 or is_gpv3)
 
     if not is_gp:
+        warn("No GP object selected")
         return break_ret
 
     name = sel.data.name
     layers = sel.data.layers
 
-    if len(layers) > 0:
-        # FIXME: should also consider other layers
-        layer = layers[0]
-        if len(layer.frames) > 0:
-            frames_match = list(filter(lambda f: f.frame_number == frame_current, layer.frames))
-            if len(frames_match) > 0:
-                frame = frames_match[0]
+    if len(layers) == 0:
+        warn("No GP_Layers found")
+        return break_ret
+    
+    # FIXME: should also consider other layers
+    layer = layers[0]
+    if len(layer.frames) == 0:
+        warn("No GP_Layers found")
+        return break_ret
+    
+    frames_match = list(filter(lambda f: f.frame_number == frame_current, layer.frames))
+    if len(frames_match) == 0:
+        warn("No GP frame matches")
+        return break_ret
+    
+    frame = frames_match[0]
 
-                if is_gpv2:
-                    strokes = frame.strokes.values()
-                elif is_gpv3:
-                    drawing = frame.drawing
-                    # FIXME: should use attributes instead of strokes for performance
-                    strokes = drawing.strokes
+    if is_gpv2:
+        strokes = frame.strokes.values()
+    elif is_gpv3:
+        drawing = frame.drawing
+        # FIXME: should use attributes instead of strokes for performance
+        strokes = drawing.strokes
 
-                for stroke in strokes:
-                    if is_gpv2:
-                        cs = [p.co for p in stroke.points.values()]
-                        vcs = [p.vertex_color for p in stroke.points.values()]
-                        alphas = [p.strength for p in stroke.points.values()]
-                        pressures = [p.pressure for p in stroke.points.values()]
-                        thickness_factor_gpv2 = get_thickness_factor_gpv2()
-                        thicknesses = np.array(pressures) * float(stroke.line_width) * thickness_factor_gpv2
-                    elif is_gpv3:
-                        # NOTE: for undocumented classes, see
-                        # https://projects.blender.org/blender/blender/issues/126610
+    if len(strokes) == 0:
+        caller.report({'WARNING'}, "No GP strokes found")
+        return break_ret
 
-                        cs = [p.position for p in stroke.points]
-                        vcs = [p.vertex_color for p in stroke.points]
-                        alphas = [p.opacity for p in stroke.points]
-                        radiuses = [p.radius for p in stroke.points]
-                        thickness_factor_gpv3 = get_thickness_factor_gpv3()
-                        thicknesses = np.array(radiuses) * thickness_factor_gpv3
+    for stroke in strokes:
+        if is_gpv2:
+            cs = [p.co for p in stroke.points.values()]
+            vcs = [p.vertex_color for p in stroke.points.values()]
+            alphas = [p.strength for p in stroke.points.values()]
+            pressures = [p.pressure for p in stroke.points.values()]
+            thickness_factor_gpv2 = get_thickness_factor_gpv2()
+            thicknesses = np.array(pressures) * float(stroke.line_width) * thickness_factor_gpv2
+        elif is_gpv3:
+            # NOTE: for undocumented classes, see
+            # https://projects.blender.org/blender/blender/issues/126610
 
-                    if with_radius:
-                        radiuses = thicknesses
-                    else:
-                        radiuses = None
+            cs = [p.position for p in stroke.points]
+            vcs = [p.vertex_color for p in stroke.points]
+            alphas = [p.opacity for p in stroke.points]
+            radiuses = [p.radius for p in stroke.points]
+            thickness_factor_gpv3 = get_thickness_factor_gpv3()
+            thicknesses = np.array(radiuses) * thickness_factor_gpv3
 
-                    curveObj = make_curves(
-                        name=f"Curve_{name}",
-                        matrix_world=obj_matrix_world,
-                        coords=cs,
-                        # vertex_colors=vcs,
-                        radiuses=radiuses,
-                        context=bpy.context)
+        if with_radius:
+            radiuses = thicknesses
+        else:
+            radiuses = None
 
-                    if convert_to_meshes:
-                        meshObj = convertCurveToMesh(curveObj=curveObj, context=bpy.context)
-                        selectObject(meshObj)
+        curveObj = make_curves(
+            name=f"Curve_{name}",
+            matrix_world=obj_matrix_world,
+            coords=cs,
+            # vertex_colors=vcs,
+            radiuses=radiuses,
+            context=bpy.context)
 
-                        color_to_vertices_from_gp(meshObj, vcs, alphas)
-                    else:
-                        selectObject(curveObj)
+        if convert_to_meshes:
+            meshObj = convertCurveToMesh(curveObj=curveObj, context=bpy.context)
+            selectObject(meshObj)
+
+            color_to_vertices_from_gp(meshObj, vcs, alphas)
+        else:
+            selectObject(curveObj)
 
     return last_ret
 
@@ -271,7 +297,7 @@ class GPCC_OT_ConvertGP2Meshes(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        return gp2curves(convert_to_meshes=True, with_radius=True)
+        return gp2curves(convert_to_meshes=True, with_radius=True, caller=self)
     
 class GPCC_OT_ConvertGP2Curves(bpy.types.Operator):
 
@@ -281,7 +307,7 @@ class GPCC_OT_ConvertGP2Curves(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        return gp2curves(convert_to_meshes=False, with_radius=True)
+        return gp2curves(convert_to_meshes=False, with_radius=True, caller=self)
     
 class GPCC_OT_ConvertGP2CurvesWithoutRadius(bpy.types.Operator):
 
@@ -291,7 +317,7 @@ class GPCC_OT_ConvertGP2CurvesWithoutRadius(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        return gp2curves(convert_to_meshes=False, with_radius=False)
+        return gp2curves(convert_to_meshes=False, with_radius=False, caller=self)
 
 
 class GPCC_MT_SubMenu(bpy.types.Menu):
