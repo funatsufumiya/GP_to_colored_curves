@@ -39,12 +39,9 @@ def make_empty(name: str, location: Vector, context: Context):
 
 def make_curves(
         name: str,
-        # location: Vector,
-        # rotation_euler: Euler,
-        # scale: Vector,
         matrix_world: Matrix,
         coords: List[Vector],
-        vertex_colors: List[bpy_prop_array],
+        # vertex_colors: List[bpy_prop_array],
         radiuses: List[float],
         context: Context
     ):
@@ -62,9 +59,6 @@ def make_curves(
     curveObj = bpy.data.objects.new(name, curveData)
     curveData.bevel_depth = 0.01
     context.collection.objects.link(curveObj)
-    # curveObj.location = location
-    # curveObj.rotation_euler = rotation_euler
-    # curveObj.scale = scale
     curveObj.matrix_world = matrix_world
     return curveObj
 
@@ -147,26 +141,13 @@ def gp2curves():
 
                     # make_empty("test_empty", center_point, bpy.context)
 
-                    # make curves
-                    # FIXME: apply other matrix (other than location)
-
-                    # curve_location = obj_location
-                    # curve_rot_euler = obj_rot_euler
-                    # curve_scale = obj_scale
                     make_curves(
                         f"Curve_{name}",
                         obj_matrix_world,
-                        # curve_location,
-                        # curve_rot_euler,
-                        # curve_scale,
                         cs,
-                        vcs,
+                        # vcs,
                         thicknesses,
                         bpy.context)
-
-                    # c0 = cs[0]
-                    # coords = [(stroke.points.matrix_world @ c) for c in cs]
-                    # log(coords)
 
     return last_ret
 
