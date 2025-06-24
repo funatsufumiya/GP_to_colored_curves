@@ -4,7 +4,7 @@ import datetime
 import numpy as np
 import mathutils
 from mathutils import Vector, Quaternion, Euler
-from bpy.types import Context
+from bpy.types import Context, bpy_prop_array
 from typing import List
 
 addon_name_for_log = "GPCC"
@@ -42,16 +42,21 @@ def make_curves(
         location: Vector,
         rotation_euler: Euler,
         scale: Vector,
-        coords: List[Vector], context: Context
+        coords: List[Vector],
+        vertex_colors: List[bpy_prop_array],
+        radiuses: List[float],
+        context: Context
     ):
     curveData = bpy.data.curves.new(name, type='CURVE')
     curveData.dimensions = '3D'
     curveData.resolution_u = 2
     polyline = curveData.splines.new('POLY')
     polyline.points.add(len(coords)-1)
+    # TODO: set vertex color
     for i, coord in enumerate(coords):
         x,y,z = coord
         polyline.points[i].co = (x, y, z, 1)
+        polyline.points[i].radius = radiuses[i]
 
     curveObj = bpy.data.objects.new(name, curveData)
     curveData.bevel_depth = 0.01
@@ -121,6 +126,9 @@ def gp2curves():
                 for stroke in strokes:
                     # log(f"stroke: {stroke}")
                     cs = [p.co for p in stroke.points.values()]
+                    vcs = [p.vertex_color for p in stroke.points.values()]
+                    pressures = [p.pressure for p in stroke.points.values()]
+                    thicknesses = pressures * stroke.line_width
                     # log(f"points: {cs}")
 
                     # # make empty at center point
@@ -147,7 +155,10 @@ def gp2curves():
                         curve_location,
                         curve_rot_euler,
                         curve_scale,
-                        cs, bpy.context)
+                        cs,
+                        vcs,
+                        thicknesses,
+                        bpy.context)
 
                     # c0 = cs[0]
                     # coords = [(stroke.points.matrix_world @ c) for c in cs]
