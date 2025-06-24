@@ -48,7 +48,7 @@ def make_curves(
         matrix_world: Matrix,
         coords: List[Vector],
         # vertex_colors: List[bpy_prop_array],
-        radiuses: List[float],
+        radiuses: List[float] | None,
         context: Context
     ):
     curveData = bpy.data.curves.new(name, type='CURVE')
@@ -56,11 +56,12 @@ def make_curves(
     curveData.resolution_u = 2
     polyline = curveData.splines.new('POLY')
     polyline.points.add(len(coords)-1)
-    # TODO: set vertex color
+
     for i, coord in enumerate(coords):
         x,y,z = coord
         polyline.points[i].co = (x, y, z, 1)
-        polyline.points[i].radius = radiuses[i]
+        if radiuses is not None:
+            polyline.points[i].radius = radiuses[i]
 
     curveObj = bpy.data.objects.new(name, curveData)
     curveData.bevel_depth = 0.01
@@ -165,7 +166,7 @@ def get_color(v: float, min: float, max: float):
         0.0, 0.0 ]
     return [r, g, b, 1.0]
 
-def gp2curves():
+def gp2curves(convert_to_meshes: bool, with_radius: bool):
     break_ret = {'FINISHED'}
     last_ret = {'FINISHED'}
 
@@ -209,18 +210,30 @@ def gp2curves():
                         thickness_factor = 0.05
                         thicknesses = np.array(pressures) * float(stroke.line_width) * thickness_factor
 
-                        curveObj = make_curves(
-                            name=f"Curve_{name}",
-                            matrix_world=obj_matrix_world,
-                            coords=cs,
-                            # vertex_colors=vcs,
-                            radiuses=thicknesses,
-                            context=bpy.context)
+                        if with_radius:
+                            curveObj = make_curves(
+                                name=f"Curve_{name}",
+                                matrix_world=obj_matrix_world,
+                                coords=cs,
+                                # vertex_colors=vcs,
+                                radiuses=thicknesses,
+                                context=bpy.context)
+                        else:
+                            curveObj = make_curves(
+                                name=f"Curve_{name}",
+                                matrix_world=obj_matrix_world,
+                                coords=cs,
+                                # vertex_colors=vcs,
+                                radiuses=None,
+                                context=bpy.context)
 
-                        meshObj = convertCurveToMesh(curveObj=curveObj, context=bpy.context)
-                        selectObject(meshObj)
+                        if convert_to_meshes:
+                            meshObj = convertCurveToMesh(curveObj=curveObj, context=bpy.context)
+                            selectObject(meshObj)
 
-                        color_to_vertices_from_gp(meshObj, vcs, alphas)
+                            color_to_vertices_from_gp(meshObj, vcs, alphas)
+                        else:
+                            selectObject(curveObj)
                 elif is_gpv3:
                     drawing = frame.drawing
 
@@ -237,30 +250,63 @@ def gp2curves():
                         thickness_factor = 100.0
                         thicknesses = np.array(radiuses) * thickness_factor
 
-                        curveObj = make_curves(
-                            name=f"Curve_{name}",
-                            matrix_world=obj_matrix_world,
-                            coords=cs,
-                            # vertex_colors=vcs,
-                            radiuses=thicknesses,
-                            context=bpy.context)
+                        if with_radius:
+                            curveObj = make_curves(
+                                name=f"Curve_{name}",
+                                matrix_world=obj_matrix_world,
+                                coords=cs,
+                                # vertex_colors=vcs,
+                                radiuses=thicknesses,
+                                context=bpy.context)
+                        else:
+                            curveObj = make_curves(
+                                name=f"Curve_{name}",
+                                matrix_world=obj_matrix_world,
+                                coords=cs,
+                                # vertex_colors=vcs,
+                                radiuses=None,
+                                context=bpy.context)
+                        
+                        if convert_to_meshes:
+                            meshObj = convertCurveToMesh(curveObj=curveObj, context=bpy.context)
+                            selectObject(meshObj)
 
-                        meshObj = convertCurveToMesh(curveObj=curveObj, context=bpy.context)
-                        selectObject(meshObj)
-
-                        color_to_vertices_from_gp(meshObj, vcs, alphas)
+                            color_to_vertices_from_gp(meshObj, vcs, alphas)
+                        else:
+                            selectObject(curveObj)
 
     return last_ret
 
-class GPCC_OT_ConvertGP2Curves(bpy.types.Operator):
+class GPCC_OT_ConvertGP2Meshes(bpy.types.Operator):
 
-    bl_idname = f"{addon_id_s}.convert_gp_to_curves"
-    bl_label = "GP to Colored Curves"
-    bl_description = "Convert grease pencil (GP) into colored curves (meshes)"
+    bl_idname = f"{addon_id_s}.convert_gp_to_meshes"
+    bl_label = "GP to Meshes (with vertex-color)"
+    bl_description = "Convert grease pencil (GP) into colored curved meshes with radius, opacity, vertex-color"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        return gp2curves()
+        return gp2curves(convert_to_meshes=True, with_radius=True)
+    
+class GPCC_OT_ConvertGP2Curves(bpy.types.Operator):
+
+    bl_idname = f"{addon_id_s}.convert_gp_to_curves"
+    bl_label = "GP to Curves (without vertex-color)"
+    bl_description = "Convert grease pencil (GP) into curves, with radius but without vertex-color and opacity"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        return gp2curves(convert_to_meshes=False, with_radius=True)
+    
+class GPCC_OT_ConvertGP2CurvesWithoutRadius(bpy.types.Operator):
+
+    bl_idname = f"{addon_id_s}.convert_gp_to_curves_without_radius"
+    bl_label = "GP to Curves (without radius, vertex-color)"
+    bl_description = "Convert grease pencil (GP) into curves, without radius, vertex-color and opacity"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        return gp2curves(convert_to_meshes=False, with_radius=False)
+
 
 class GPCC_MT_SubMenu(bpy.types.Menu):
     bl_idname = f"{addon_id_s}.submenu"
@@ -268,5 +314,6 @@ class GPCC_MT_SubMenu(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout
+        layout.operator(GPCC_OT_ConvertGP2Meshes.bl_idname)
         layout.operator(GPCC_OT_ConvertGP2Curves.bl_idname)
-        # layout.operator(gp2curves.bl_idname,text=gp2curves.bl_label)
+        layout.operator(GPCC_OT_ConvertGP2CurvesWithoutRadius.bl_idname)
