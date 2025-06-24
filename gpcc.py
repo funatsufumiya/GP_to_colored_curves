@@ -4,7 +4,8 @@ blender_version = bpy.app.version
 major_version = blender_version[0]
 minor_version = blender_version[1]
 
-is_blv_gpv2 = (major_version == 4 and minor_version <= 2)
+is_blv_gpv2 = (major_version == 4 and minor_version <= 2) or (major_version < 4)
+is_blv_gpv3 = not is_blv_gpv2
 
 import os
 import datetime
@@ -156,15 +157,29 @@ def mapv(v: float, vmin: float, vmax: float, tmin: float, tmax: float):
     """
     return tmin + (v - vmin) * (tmax - tmin) / (vmax - vmin)
 
-def random_color():
-    r,g,b = [random.uniform(0, 1) for i in range(3)]
-    return [r, g, b, 1.0]
+# def random_color():
+#     r,g,b = [random.uniform(0, 1) for i in range(3)]
+#     return [r, g, b, 1.0]
 
-def get_color(v: float, min: float, max: float):
-    r,g,b = [
-        mapv(v, min, max, 0.0, 1.0),
-        0.0, 0.0 ]
-    return [r, g, b, 1.0]
+# def get_color(v: float, min: float, max: float):
+#     r,g,b = [
+#         mapv(v, min, max, 0.0, 1.0),
+#         0.0, 0.0 ]
+#     return [r, g, b, 1.0]
+
+def get_thickness_factor_gpv2():
+    try:
+        addon_prefs = bpy.context.preferences.addons[__package__].preferences
+        return addon_prefs.thickness_factor_gpv2
+    except Exception:
+        return 0.05
+
+def get_thickness_factor_gpv3():
+    try:
+        addon_prefs = bpy.context.preferences.addons[__package__].preferences
+        return addon_prefs.thickness_factor_gpv3
+    except Exception:
+        return 100.0
 
 def gp2curves(convert_to_meshes: bool, with_radius: bool):
     break_ret = {'FINISHED'}
@@ -212,8 +227,8 @@ def gp2curves(convert_to_meshes: bool, with_radius: bool):
                         vcs = [p.vertex_color for p in stroke.points.values()]
                         alphas = [p.strength for p in stroke.points.values()]
                         pressures = [p.pressure for p in stroke.points.values()]
-                        thickness_factor = 0.05
-                        thicknesses = np.array(pressures) * float(stroke.line_width) * thickness_factor
+                        thickness_factor_gpv2 = get_thickness_factor_gpv2()
+                        thicknesses = np.array(pressures) * float(stroke.line_width) * thickness_factor_gpv2
                     elif is_gpv3:
                         # NOTE: for undocumented classes, see
                         # https://projects.blender.org/blender/blender/issues/126610
@@ -222,9 +237,8 @@ def gp2curves(convert_to_meshes: bool, with_radius: bool):
                         vcs = [p.vertex_color for p in stroke.points]
                         alphas = [p.opacity for p in stroke.points]
                         radiuses = [p.radius for p in stroke.points]
-                        # thickness_factor = 0.05
-                        thickness_factor = 100.0
-                        thicknesses = np.array(radiuses) * thickness_factor
+                        thickness_factor_gpv3 = get_thickness_factor_gpv3()
+                        thicknesses = np.array(radiuses) * thickness_factor_gpv3
 
                     if with_radius:
                         radiuses = thicknesses

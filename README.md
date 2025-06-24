@@ -25,18 +25,21 @@ Download whole code from GitHub's "Download ZIP" menu, and rename it to "GP to C
 - Select a grease pencil (GP) object in Object Mode,
 - Execute a menu command at `Object > GP to Colored Curves > GP to Meshes (with vertex-color)`. (You can also directly call it from F3 search menu).
 
+## Preferences
+
+- You can adjust `thickness_factor` in addon preferences. This is multiplication factor for curve radius.
+
 ## Known Issues
 
 - Generated meshes have vertex colors (with alpha), but would not shown colors as default. You should create proper shader node for it (using `Color Attribute` node.)
     - Shader Nodes example: ![docs/screenshot_sn_attribute.png](docs/screenshot_sn_attribute.png)
 - Radius(es) may bigger or smaller because of unit difference (pixels and meters, on Blender 4.2 LTS)
-    - Multiplication factor should be variable, or need proper algorithm to convert units.
+    - Multiplication factor (`thickness_factor`) can be adjusted in addon preferences.
 - Not all GP_Layers are considered. (Currently checking only first layer. This would ***NOT*** be fixed soon, you can fork the code and modify them.) 
 - Only strokes are supported. ***NOT*** fills for now.
 
 ## TODOs
 
-- Adjust multiplication factor from pixels to radius (Blender 4.2 LTS)
 - Curve profile adjustment
 - Support more GP_Layers...?
 - Support fills in addition to strokes...?
