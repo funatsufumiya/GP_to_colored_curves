@@ -96,17 +96,13 @@ def convertCurveToMesh(
     deleteObject(curveObj)
     return new_obj
 
-# https://blender.stackexchange.com/a/131042/165377
 def color_to_vertices(
         meshObj: Object,
     ):
-    # mesh = bpy.context.active_object.data
     assert meshObj.type == "MESH"
     mesh = meshObj.data
-    # bpy.ops.object.mode_set(mode = 'VERTEX_PAINT')
 
     if not mesh.attributes.active_color:
-    #    color_layer = mesh.vertex_colors.new()
        color_layer = mesh.color_attributes.new("Col", 'FLOAT_COLOR', 'POINT')
     else:
        color_layer = mesh.attributes.active_color
@@ -119,8 +115,6 @@ def color_to_vertices(
 
     for i in range(len(color_layer.data)):
         color_layer.data[i].color = random_color()
-
-    # bpy.ops.object.mode_set(mode = 'EDIT')
 
 def random_color():
     r,g,b = [random.uniform(0, 1) for i in range(3)]
