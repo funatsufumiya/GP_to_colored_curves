@@ -193,8 +193,8 @@ def gp2curves(convert_to_meshes: bool, with_radius: bool, caller: Operator | Non
         if caller is None:
             log(f"[Warning] {s}")
         else:
-            caller.report({'ERROR_INVALID_INPUT'}, s)
-            bpy.context.window_manager.popup_menu(s, title="Error", icon='ERROR')
+            caller.report({'WARNING'}, s)
+            # bpy.context.window_manager.popup_menu(s, title="Error", icon='ERROR')
             log(f"[Warning] {s}")
 
     frame_current = bpy.context.scene.frame_current
