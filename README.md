@@ -12,7 +12,7 @@ Tested on Blender 4.2 LTS ([GPv2](https://projects.blender.org/blender/blender/i
 
 ### NOTE: "Grease Pencil to Curves Node" as an public alternative
 
-On Blender 4.3+ you can also try Geometry Nodes named [Grease Pencil to Curves Node](https://docs.blender.org/manual/en/latest/modeling/geometry_nodes/curve/operations/grease_pencil_to_curves.html) as an (public) alternative, without install this addon.
+On Blender 4.3+ you can also try Geometry Nodes named [Grease Pencil to Curves Node](https://docs.blender.org/manual/en/latest/modeling/geometry_nodes/curve/operations/grease_pencil_to_curves.html) as an (public) alternative, without install this addon. (**WARNING**: This addon provides nearest the same functionality, but only provides Python script, not Geometry Nodes. )
   - Geometry Nodes example (for Blender 4.3+): ![docs/screenshot_gn.png](docs/screenshot_gn.png)
   - Shader Nodes example (for Blender 4.3+): ![docs/screenshot_sn.png](docs/screenshot_sn.png)
 
