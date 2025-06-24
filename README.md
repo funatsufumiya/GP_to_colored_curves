@@ -38,4 +38,4 @@ After install, first, please select a grease pencil (GP) object in Object Mode, 
 - Blender 4.3+ support ([GPv3](https://projects.blender.org/blender/blender/issues/114419) support)
 - Curve profile adjustment
 - Support more GP_Layers...?
-- Support fills instead of strokes...?
+- Support fills in addition to strokes...?
