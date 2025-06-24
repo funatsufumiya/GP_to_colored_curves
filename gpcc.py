@@ -3,7 +3,7 @@ import os
 import datetime
 import numpy as np
 import mathutils
-from mathutils import Vector, Quaternion, Euler
+from mathutils import Vector, Quaternion, Euler, Matrix
 from bpy.types import Context, bpy_prop_array
 from typing import List
 
@@ -39,9 +39,10 @@ def make_empty(name: str, location: Vector, context: Context):
 
 def make_curves(
         name: str,
-        location: Vector,
-        rotation_euler: Euler,
-        scale: Vector,
+        # location: Vector,
+        # rotation_euler: Euler,
+        # scale: Vector,
+        matrix_world: Matrix,
         coords: List[Vector],
         vertex_colors: List[bpy_prop_array],
         radiuses: List[float],
@@ -61,9 +62,10 @@ def make_curves(
     curveObj = bpy.data.objects.new(name, curveData)
     curveData.bevel_depth = 0.01
     context.collection.objects.link(curveObj)
-    curveObj.location = location
-    curveObj.rotation_euler = rotation_euler
-    curveObj.scale = scale
+    # curveObj.location = location
+    # curveObj.rotation_euler = rotation_euler
+    # curveObj.scale = scale
+    curveObj.matrix_world = matrix_world
     return curveObj
 
 def gp2curves():
@@ -82,9 +84,10 @@ def gp2curves():
     
     sel = sels[0]
     # obj_name = sel.name
-    obj_location = sel.location
-    obj_rot_euler = sel.rotation_euler
-    obj_scale = sel.scale
+    # obj_location = sel.location
+    # obj_rot_euler = sel.rotation_euler
+    # obj_scale = sel.scale
+    obj_matrix_world = sel.matrix_world
     obj_type = sel.type
 
     # log(f"rot_quat: {obj_rot_quat}")
@@ -147,14 +150,15 @@ def gp2curves():
                     # make curves
                     # FIXME: apply other matrix (other than location)
 
-                    curve_location = obj_location
-                    curve_rot_euler = obj_rot_euler
-                    curve_scale = obj_scale
+                    # curve_location = obj_location
+                    # curve_rot_euler = obj_rot_euler
+                    # curve_scale = obj_scale
                     make_curves(
                         f"Curve_{name}",
-                        curve_location,
-                        curve_rot_euler,
-                        curve_scale,
+                        obj_matrix_world,
+                        # curve_location,
+                        # curve_rot_euler,
+                        # curve_scale,
                         cs,
                         vcs,
                         thicknesses,
