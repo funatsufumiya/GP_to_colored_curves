@@ -11,6 +11,8 @@ Tested on Blender 4.2 LTS.
 
 - Blender 4.3+ is ***NOT*** currently supported (because of [GPv3](https://projects.blender.org/blender/blender/issues/114419)).
     - as for now, you can use Geometry Nodes named [Grease Pencil to Curves Node](https://docs.blender.org/manual/en/latest/modeling/geometry_nodes/curve/operations/grease_pencil_to_curves.html)
+    - Geometry Nodes example: ![docs/screenshot_gn.png](docs/screenshot_gn.png)
+    - Shader Nodes example: ![docs/screenshot_sn.png](docs/screenshot_sn.png)
 
 ## Install
 
@@ -23,6 +25,7 @@ After install, first, please select a grease pencil (GP) object in Object Mode, 
 ## Known Issues
 
 - Generated meshes have vertex colors (with alpha), but would not shown colors as default. You should create proper shader node for it (using `Color Attribute` node.)
+    - Shader Nodes example: ![docs/screenshot_sn_attribute.png](docs/screenshot_sn_attribute.png)
 
 ## TODOs
 
