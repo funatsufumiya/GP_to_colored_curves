@@ -27,10 +27,12 @@ After install, first, please select a grease pencil (GP) object in Object Mode, 
 - Generated meshes have vertex colors (with alpha), but would not shown colors as default. You should create proper shader node for it (using `Color Attribute` node.)
     - Shader Nodes example: ![docs/screenshot_sn_attribute.png](docs/screenshot_sn_attribute.png)
 - Radius(es) may bigger or smaller because of unit difference (pixels and meters, on Blender 4.2 LTS)
-    - Multiplication factor should be variable, or need proper algorithm to convert units. 
+    - Multiplication factor should be variable, or need proper algorithm to convert units.
+- Not all GP_Layers are considered. (This would not be fixed as soon, you can fork the code and modify them.) 
 
 ## TODOs
 
 - Adjust multiplication factor from pixels to radius (Blender 4.2 LTS)
 - Blender 4.3+ support ([GPv3](https://projects.blender.org/blender/blender/issues/114419) support)
 - Curve profile adjustment
+- Support more GP_Layers...?
