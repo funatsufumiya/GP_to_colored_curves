@@ -19,6 +19,10 @@ Download whole code from GitHub's "Download ZIP" menu, and rename it to "GP to C
 
 After install, first, please select a grease pencil (GP) object in Object Mode, and then call `Object > GP to Colored Curves > GP to Colored Curves` menu (you can also directly call it from F3 search menu).
 
+## Known Issues
+
+- Generated meshes has vertex colors (with alpha), but would not shown colors as default. You should create proper shader node for it (using `Color Attribute` node.)
+
 ## TODOs
 
 - Adjust multiplication factor from pixels to radius (Blender 4.2 LTS)
