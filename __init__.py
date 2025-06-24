@@ -1,9 +1,9 @@
 bl_info = {
-    "name": "GPCC",
+    "name": "GP to Colored Curves",
     "author": "Fumiya Funatsu",
     "version": (0, 1, 1),
     "blender": (2, 80, 0),
-    "description": "convert grease pencil into colored curve",
+    "description": "Convert grease pencil (GP) into colored curves (meshes)",
     "category": "Object"
 }
 
@@ -16,7 +16,6 @@ if "gpcc" in locals():
     
 from . import gpcc
 
-gp2curves = gpcc.GPCC_OT_ConvertGP2Curves
 log = gpcc.log
 
 def is_addon_installed(addon_name):
@@ -25,20 +24,31 @@ def is_addon_installed(addon_name):
             return True
     return False
 
+gp2curves = gpcc.GPCC_OT_ConvertGP2Curves
+submenu = gpcc.GPCC_MT_SubMenu
+
+classes = [
+    gp2curves,
+    submenu
+]
+
 def menu_fn(self, context):
     self.layout.separator()
-    self.layout.operator(gp2curves.bl_idname)
+    # self.layout.operator(gp2curves.bl_idname)
+    self.layout.menu(submenu.bl_idname)
 
 def register():
     if is_addon_installed(gpcc.addon_id_b):
         unregister()
-    bpy.utils.register_class(gp2curves)
-    bpy.types.VIEW3D_MT_add.append(menu_fn)
+    for c in classes:
+        bpy.utils.register_class(c)
+    bpy.types.VIEW3D_MT_object.append(menu_fn)
     # log("registered")
 
 def unregister():
-    bpy.types.VIEW3D_MT_add.remove(menu_fn)
-    bpy.utils.unregister_class(gp2curves)
+    bpy.types.VIEW3D_MT_object.remove(menu_fn)
+    for c in classes:
+        bpy.utils.unregister_class(c)
     # log("unregistered")
 
 if __name__ == "__main__":

@@ -1,1 +1,1 @@
-# b3d_greasepencil_to_colored_curves
+# GP to Colored Curves

@@ -8,7 +8,7 @@ from bpy.types import Context, bpy_prop_array, Object
 from typing import List
 import random
 
-addon_name_for_log = "GPCC"
+addon_name_for_log = "GP to Colored Curves"
 addon_id_b = "GPCC"
 addon_id_s = "gpcc"
 
@@ -214,9 +214,18 @@ def gp2curves():
 class GPCC_OT_ConvertGP2Curves(bpy.types.Operator):
 
     bl_idname = f"{addon_id_s}.convert_gp_to_curves"
-    bl_label = "gp_to_curves"
-    bl_description = "convert grease pencil into curves"
+    bl_label = "GP to Colored Curves"
+    bl_description = "Convert grease pencil (GP) into colored curves (meshes)"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         return gp2curves()
+
+class GPCC_MT_SubMenu(bpy.types.Menu):
+    bl_idname = f"{addon_id_s}.submenu"
+    bl_label = "GP to Colored Curves"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator(GPCC_OT_ConvertGP2Curves.bl_idname)
+        # layout.operator(gp2curves.bl_idname,text=gp2curves.bl_label)
