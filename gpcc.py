@@ -4,7 +4,7 @@ import datetime
 import numpy as np
 import mathutils
 from mathutils import Vector, Quaternion, Euler, Matrix
-from bpy.types import Context, bpy_prop_array
+from bpy.types import Context, bpy_prop_array, Object
 from typing import List
 
 addon_name_for_log = "GPCC"
@@ -61,6 +61,37 @@ def make_curves(
     context.collection.objects.link(curveObj)
     curveObj.matrix_world = matrix_world
     return curveObj
+
+def deleteObject(obj: Object):
+    sels = bpy.context.selected_objects
+    for o in sels:
+        o.select_set(False)
+    obj.select_set(True)
+    bpy.ops.object.delete()
+    for o in sels:
+        o.select_set(True)
+
+def deselect():
+    sels = bpy.context.selected_objects
+    for o in sels:
+        o.select_set(False)
+
+def selectObject(obj: Object, need_deselect=True):
+    if need_deselect:
+        deselect()
+    obj.select_set(True)
+
+def convertCurveToMesh(
+        curveObj: Object,
+        context: Context
+    ):
+    assert curveObj.type == "CURVE"
+    mesh = bpy.data.meshes.new_from_object(curveObj)
+    new_obj = bpy.data.objects.new(f"Mesh_{curveObj.name}", mesh)
+    new_obj.matrix_world = curveObj.matrix_world
+    context.collection.objects.link(new_obj)
+    deleteObject(curveObj)
+    return new_obj
 
 def gp2curves():
     break_ret = {'FINISHED'}
@@ -141,13 +172,18 @@ def gp2curves():
 
                     # make_empty("test_empty", center_point, bpy.context)
 
-                    make_curves(
-                        f"Curve_{name}",
-                        obj_matrix_world,
-                        cs,
+                    curveObj = make_curves(
+                        name=f"Curve_{name}",
+                        matrix_world=obj_matrix_world,
+                        coords=cs,
                         # vcs,
-                        thicknesses,
-                        bpy.context)
+                        radiuses=thicknesses,
+                        context=bpy.context)
+
+                    # selectObject(curveObj)
+
+                    meshObj = convertCurveToMesh(curveObj=curveObj, context=bpy.context)
+                    selectObject(meshObj)
 
     return last_ret
 
