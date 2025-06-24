@@ -9,7 +9,8 @@ Convert grease pencil (GP) into colored curves (meshes).
 
 Tested on Blender 4.2 LTS.
 
-Blender 4.3+ is ***NOT*** currently supported (because of [GPv3](https://projects.blender.org/blender/blender/issues/114419)).
+- Blender 4.3+ is ***NOT*** currently supported (because of [GPv3](https://projects.blender.org/blender/blender/issues/114419)).
+    - as for now, you can use Geometry Nodes named [Grease Pencil to Curves Node](https://docs.blender.org/manual/en/latest/modeling/geometry_nodes/curve/operations/grease_pencil_to_curves.html)
 
 ## Install
 
