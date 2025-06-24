@@ -2,7 +2,7 @@
 
 Convert grease pencil (GP) into colored curves (meshes).
 
-- GP's alpha (strength) and radius (thickness) are applied on converted meshes
+- GP's vertex-color, alpha (strength) and radius (thickness) are applied on converted meshes
 
 ![docs/screenshot_a.png](docs/screenshot_a.png)
 ![docs/screenshot_b.png](docs/screenshot_b.png)
