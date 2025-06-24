@@ -1,11 +1,17 @@
 import bpy
+
+blender_version = bpy.app.version
+major_version = blender_version[0]
+minor_version = blender_version[1]
+
+is_blv_gpv2 = (major_version == 4 and minor_version <= 2)
+
 import os
 import datetime
 import numpy as np
 import mathutils
 from mathutils import Vector, Quaternion, Euler, Matrix
-from bpy.types import Context, bpy_prop_array, Object, GPencilFrame, GreasePencilFrame, \
-    GPencilStroke, GreasePencilDrawing
+from bpy.types import Context, bpy_prop_array, Object
 from typing import List
 import random
 
