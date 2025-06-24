@@ -26,6 +26,8 @@ After install, first, please select a grease pencil (GP) object in Object Mode, 
 
 - Generated meshes have vertex colors (with alpha), but would not shown colors as default. You should create proper shader node for it (using `Color Attribute` node.)
     - Shader Nodes example: ![docs/screenshot_sn_attribute.png](docs/screenshot_sn_attribute.png)
+- Radius(es) may bigger or smaller because of unit difference (pixels and meters, on Blender 4.2 LTS)
+    - Multiplication factor should be variable, or need proper algorithm to convert units. 
 
 ## TODOs
 
