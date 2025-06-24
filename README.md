@@ -28,7 +28,7 @@ After install, first, please select a grease pencil (GP) object in Object Mode, 
     - Shader Nodes example: ![docs/screenshot_sn_attribute.png](docs/screenshot_sn_attribute.png)
 - Radius(es) may bigger or smaller because of unit difference (pixels and meters, on Blender 4.2 LTS)
     - Multiplication factor should be variable, or need proper algorithm to convert units.
-- Not all GP_Layers are considered. (This would not be fixed as soon, you can fork the code and modify them.) 
+- Not all GP_Layers are considered. (Currently checking only first layer. This would ***NOT*** be fixed soon, you can fork the code and modify them.) 
 - Only strokes are supported. ***NOT*** fills for now.
 
 ## TODOs
