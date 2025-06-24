@@ -21,7 +21,7 @@ After install, first, please select a grease pencil (GP) object in Object Mode, 
 
 ## Known Issues
 
-- Generated meshes has vertex colors (with alpha), but would not shown colors as default. You should create proper shader node for it (using `Color Attribute` node.)
+- Generated meshes have vertex colors (with alpha), but would not shown colors as default. You should create proper shader node for it (using `Color Attribute` node.)
 
 ## TODOs
 
