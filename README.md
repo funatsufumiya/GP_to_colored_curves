@@ -8,10 +8,9 @@ Convert grease pencil (GP) into colored curves (meshes).
 ![docs/screenshot_a.png](docs/screenshot_a.png)
 ![docs/screenshot_b.png](docs/screenshot_b.png)
 
-Tested on Blender 4.2 LTS.
+Tested on Blender 4.2 LTS ([GPv2](https://projects.blender.org/blender/blender/issues/114419)), 4.4 ([GPv3](https://projects.blender.org/blender/blender/issues/114419)).
 
-- Blender 4.3+ is ***NOT*** currently supported (because of [GPv3](https://projects.blender.org/blender/blender/issues/114419)).
-    - as for now, you can use Geometry Nodes named [Grease Pencil to Curves Node](https://docs.blender.org/manual/en/latest/modeling/geometry_nodes/curve/operations/grease_pencil_to_curves.html)
+- NOTE: on Blender 4.3+ you can also try Geometry Nodes named [Grease Pencil to Curves Node](https://docs.blender.org/manual/en/latest/modeling/geometry_nodes/curve/operations/grease_pencil_to_curves.html) as an alternative.
     - Geometry Nodes example (for Blender 4.3+): ![docs/screenshot_gn.png](docs/screenshot_gn.png)
     - Shader Nodes example (for Blender 4.3+): ![docs/screenshot_sn.png](docs/screenshot_sn.png)
 
@@ -35,7 +34,6 @@ After install, first, please select a grease pencil (GP) object in Object Mode, 
 ## TODOs
 
 - Adjust multiplication factor from pixels to radius (Blender 4.2 LTS)
-- Blender 4.3+ support ([GPv3](https://projects.blender.org/blender/blender/issues/114419) support)
 - Curve profile adjustment
 - Support more GP_Layers...?
 - Support fills in addition to strokes...?

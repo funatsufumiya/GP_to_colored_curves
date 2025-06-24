@@ -4,7 +4,8 @@ import datetime
 import numpy as np
 import mathutils
 from mathutils import Vector, Quaternion, Euler, Matrix
-from bpy.types import Context, bpy_prop_array, Object
+from bpy.types import Context, bpy_prop_array, Object, GPencilFrame, GreasePencilFrame, \
+    GPencilStroke, GreasePencilDrawing
 from typing import List
 import random
 
@@ -173,7 +174,11 @@ def gp2curves():
     obj_matrix_world = sel.matrix_world
     obj_type = sel.type
 
-    if obj_type != "GPENCIL":
+    is_gpv3 = (obj_type == "GREASEPENCIL")
+    is_gpv2 = (obj_type == "GPENCIL")
+    is_gp = (is_gpv2 or is_gpv3)
+
+    if not is_gp:
         return break_ret
 
     name = sel.data.name
@@ -187,28 +192,57 @@ def gp2curves():
             if len(frames_match) > 0:
                 frame = frames_match[0]
 
-                strokes = frame.strokes.values()
+                if is_gpv2:
+                    strokes = frame.strokes.values()
 
-                for stroke in strokes:
-                    cs = [p.co for p in stroke.points.values()]
-                    vcs = [p.vertex_color for p in stroke.points.values()]
-                    alphas = [p.strength for p in stroke.points.values()]
-                    pressures = [p.pressure for p in stroke.points.values()]
-                    thickness_factor = 0.05
-                    thicknesses = np.array(pressures) * float(stroke.line_width) * thickness_factor
+                    for stroke in strokes:
+                        cs = [p.co for p in stroke.points.values()]
+                        vcs = [p.vertex_color for p in stroke.points.values()]
+                        alphas = [p.strength for p in stroke.points.values()]
+                        pressures = [p.pressure for p in stroke.points.values()]
+                        thickness_factor = 0.05
+                        thicknesses = np.array(pressures) * float(stroke.line_width) * thickness_factor
 
-                    curveObj = make_curves(
-                        name=f"Curve_{name}",
-                        matrix_world=obj_matrix_world,
-                        coords=cs,
-                        # vertex_colors=vcs,
-                        radiuses=thicknesses,
-                        context=bpy.context)
+                        curveObj = make_curves(
+                            name=f"Curve_{name}",
+                            matrix_world=obj_matrix_world,
+                            coords=cs,
+                            # vertex_colors=vcs,
+                            radiuses=thicknesses,
+                            context=bpy.context)
 
-                    meshObj = convertCurveToMesh(curveObj=curveObj, context=bpy.context)
-                    selectObject(meshObj)
+                        meshObj = convertCurveToMesh(curveObj=curveObj, context=bpy.context)
+                        selectObject(meshObj)
 
-                    color_to_vertices_from_gp(meshObj, vcs, alphas)
+                        color_to_vertices_from_gp(meshObj, vcs, alphas)
+                elif is_gpv3:
+                    drawing = frame.drawing
+
+                    # FIXME: should use attributes instead of strokes for performance
+                    for stroke in drawing.strokes:
+                        # NOTE: for undocumented classes, see
+                        # https://projects.blender.org/blender/blender/issues/126610
+
+                        cs = [p.position for p in stroke.points]
+                        vcs = [p.vertex_color for p in stroke.points]
+                        alphas = [p.opacity for p in stroke.points]
+                        radiuses = [p.radius for p in stroke.points]
+                        # thickness_factor = 0.05
+                        thickness_factor = 100.0
+                        thicknesses = np.array(radiuses) * thickness_factor
+
+                        curveObj = make_curves(
+                            name=f"Curve_{name}",
+                            matrix_world=obj_matrix_world,
+                            coords=cs,
+                            # vertex_colors=vcs,
+                            radiuses=thicknesses,
+                            context=bpy.context)
+
+                        meshObj = convertCurveToMesh(curveObj=curveObj, context=bpy.context)
+                        selectObject(meshObj)
+
+                        color_to_vertices_from_gp(meshObj, vcs, alphas)
 
     return last_ret
 
