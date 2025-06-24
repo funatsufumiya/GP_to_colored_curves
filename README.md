@@ -20,7 +20,8 @@ Download whole code from GitHub's "Download ZIP" menu, and rename it to "GP to C
 
 ## Usage
 
-After install, first, please select a grease pencil (GP) object in Object Mode, and then call `Object > GP to Colored Curves > GP to Colored Curves` menu (you can also directly call it from F3 search menu).
+- Select a grease pencil (GP) object in Object Mode,
+- Execute a menu command at `Object > GP to Colored Curves > GP to Colored Curves` (you can also directly call it from F3 search menu).
 
 ## Known Issues
 
