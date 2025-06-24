@@ -6,6 +6,7 @@ import mathutils
 from mathutils import Vector, Quaternion, Euler, Matrix
 from bpy.types import Context, bpy_prop_array, Object
 from typing import List
+import random
 
 addon_name_for_log = "GPCC"
 addon_id_b = "GPCC"
@@ -76,6 +77,8 @@ def deselect():
     for o in sels:
         o.select_set(False)
 
+    bpy.ops.object.select_all(action='DESELECT')
+
 def selectObject(obj: Object, need_deselect=True):
     if need_deselect:
         deselect()
@@ -92,6 +95,37 @@ def convertCurveToMesh(
     context.collection.objects.link(new_obj)
     deleteObject(curveObj)
     return new_obj
+
+# https://blender.stackexchange.com/a/131042/165377
+def color_to_vertices(
+        meshObj: Object,
+        color: List[float]
+    ):
+    # mesh = bpy.context.active_object.data
+    assert meshObj.type == "MESH"
+    mesh = meshObj.data
+    # bpy.ops.object.mode_set(mode = 'VERTEX_PAINT')
+
+    if not mesh.attributes.active_color:
+    #    color_layer = mesh.vertex_colors.new()
+       color_layer = mesh.color_attributes.new("Col", 'FLOAT_COLOR', 'POINT')
+    else:
+       color_layer = mesh.attributes.active_color
+
+    selected_verts = []
+    for vert in mesh.vertices:
+        if vert.select == True:
+            selected_verts.append(vert)
+
+    for polygon in mesh.polygons:
+        for selected_vert in selected_verts:
+            for i, index in enumerate(polygon.vertices):
+                if selected_vert.index == index:
+                    loop_index = polygon.loop_indices[i]
+                    # mesh.vertex_colors.active.data[loop_index].color = color
+                    color_layer.data[loop_index].color = color
+
+    # bpy.ops.object.mode_set(mode = 'EDIT')
 
 def gp2curves():
     break_ret = {'FINISHED'}
@@ -185,6 +219,11 @@ def gp2curves():
 
                     meshObj = convertCurveToMesh(curveObj=curveObj, context=bpy.context)
                     selectObject(meshObj)
+
+                    r,g,b = [random.uniform(0,1) for i in range(3)]
+                    RGBA = [r,g,b,1]
+                    color_to_vertices(meshObj, RGBA)
+                    # color_to_vertices(color=RGB)
 
     return last_ret
 
