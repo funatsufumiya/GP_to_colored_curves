@@ -201,44 +201,20 @@ def gp2curves(convert_to_meshes: bool, with_radius: bool):
 
                 if is_gpv2:
                     strokes = frame.strokes.values()
+                elif is_gpv3:
+                    drawing = frame.drawing
+                    # FIXME: should use attributes instead of strokes for performance
+                    strokes = drawing.strokes
 
-                    for stroke in strokes:
+                for stroke in strokes:
+                    if is_gpv2:
                         cs = [p.co for p in stroke.points.values()]
                         vcs = [p.vertex_color for p in stroke.points.values()]
                         alphas = [p.strength for p in stroke.points.values()]
                         pressures = [p.pressure for p in stroke.points.values()]
                         thickness_factor = 0.05
                         thicknesses = np.array(pressures) * float(stroke.line_width) * thickness_factor
-
-                        if with_radius:
-                            curveObj = make_curves(
-                                name=f"Curve_{name}",
-                                matrix_world=obj_matrix_world,
-                                coords=cs,
-                                # vertex_colors=vcs,
-                                radiuses=thicknesses,
-                                context=bpy.context)
-                        else:
-                            curveObj = make_curves(
-                                name=f"Curve_{name}",
-                                matrix_world=obj_matrix_world,
-                                coords=cs,
-                                # vertex_colors=vcs,
-                                radiuses=None,
-                                context=bpy.context)
-
-                        if convert_to_meshes:
-                            meshObj = convertCurveToMesh(curveObj=curveObj, context=bpy.context)
-                            selectObject(meshObj)
-
-                            color_to_vertices_from_gp(meshObj, vcs, alphas)
-                        else:
-                            selectObject(curveObj)
-                elif is_gpv3:
-                    drawing = frame.drawing
-
-                    # FIXME: should use attributes instead of strokes for performance
-                    for stroke in drawing.strokes:
+                    elif is_gpv3:
                         # NOTE: for undocumented classes, see
                         # https://projects.blender.org/blender/blender/issues/126610
 
@@ -250,30 +226,26 @@ def gp2curves(convert_to_meshes: bool, with_radius: bool):
                         thickness_factor = 100.0
                         thicknesses = np.array(radiuses) * thickness_factor
 
-                        if with_radius:
-                            curveObj = make_curves(
-                                name=f"Curve_{name}",
-                                matrix_world=obj_matrix_world,
-                                coords=cs,
-                                # vertex_colors=vcs,
-                                radiuses=thicknesses,
-                                context=bpy.context)
-                        else:
-                            curveObj = make_curves(
-                                name=f"Curve_{name}",
-                                matrix_world=obj_matrix_world,
-                                coords=cs,
-                                # vertex_colors=vcs,
-                                radiuses=None,
-                                context=bpy.context)
-                        
-                        if convert_to_meshes:
-                            meshObj = convertCurveToMesh(curveObj=curveObj, context=bpy.context)
-                            selectObject(meshObj)
+                    if with_radius:
+                        radiuses = thicknesses
+                    else:
+                        radiuses = None
 
-                            color_to_vertices_from_gp(meshObj, vcs, alphas)
-                        else:
-                            selectObject(curveObj)
+                    curveObj = make_curves(
+                        name=f"Curve_{name}",
+                        matrix_world=obj_matrix_world,
+                        coords=cs,
+                        # vertex_colors=vcs,
+                        radiuses=radiuses,
+                        context=bpy.context)
+
+                    if convert_to_meshes:
+                        meshObj = convertCurveToMesh(curveObj=curveObj, context=bpy.context)
+                        selectObject(meshObj)
+
+                        color_to_vertices_from_gp(meshObj, vcs, alphas)
+                    else:
+                        selectObject(curveObj)
 
     return last_ret
 

@@ -1,7 +1,7 @@
 bl_info = {
     "name": "GP to Colored Curves",
     "author": "Fumiya Funatsu",
-    "version": (0, 1, 3),
+    "version": (0, 1, 4),
     "blender": (2, 80, 0),
     "description": "Convert grease pencil (GP) into colored curves (meshes)",
     "category": "Object"
