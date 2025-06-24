@@ -23,7 +23,7 @@ Download whole code from GitHub's "Download ZIP" menu, and rename it to "GP to C
 ## Usage
 
 - Select a grease pencil (GP) object in Object Mode,
-- Execute a menu command at `Object > GP to Colored Curves > GP to Meshes (with vertex-color)` (you can also directly call it from F3 search menu).
+- Execute a menu command at `Object > GP to Colored Curves > GP to Meshes (with vertex-color)`. (You can also directly call it from F3 search menu).
 
 ## Known Issues
 
