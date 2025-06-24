@@ -107,17 +107,49 @@ def color_to_vertices(
     else:
        color_layer = mesh.attributes.active_color
 
-    # for polygon in mesh.polygons:
-    #     for i, index in enumerate(polygon.vertices):
-    #         loop_index = polygon.loop_indices[i]
-    #         # mesh.vertex_colors.active.data[loop_index].color = color
-    #         color_layer.data[loop_index].color = random_color()
+    zs = np.array([v.co[1] for v in mesh.vertices])
+    z_max = np.max(zs)
+    z_min = np.min(zs)
+    for polygon in mesh.polygons:
+        for i, vi in zip(polygon.loop_indices, polygon.vertices):
+            if i < len(color_layer.data):
+                z = zs[vi]
+                # color_layer.data[i].color = random_color()
+                # color_layer.data[i].color = get_color(i, len(color_layer.data))
+                color_layer.data[i].color = get_color(z, z_min, z_max)
 
-    for i in range(len(color_layer.data)):
-        color_layer.data[i].color = random_color()
+    # for i in range(len(color_layer.data)):
+    #     color_layer.data[i].color = random_color()
+
+def color_to_vertices_from_gp(meshObj: Object, gp_vertex_colors: List[bpy_prop_array]):
+    mesh = meshObj.data
+    if not mesh.attributes.active_color:
+        color_layer = mesh.color_attributes.new("Col", 'FLOAT_COLOR', 'POINT')
+    else:
+        color_layer = mesh.attributes.active_color
+
+    # find nearest curve index
+    n_dst = len(mesh.vertices)
+    n_src = len(gp_vertex_colors)
+    for i, v in enumerate(mesh.vertices):
+        # match index linear (assuming the same order)
+        idx = int(mapv(i, 0, n_dst-1, 0, n_src-1))
+        color_layer.data[i].color = gp_vertex_colors[idx]
+
+def mapv(v: float, vmin: float, vmax: float, tmin: float, tmax: float):
+    """
+    Map a value v from range [vmin, vmax] to range [tmin, tmax].
+    """
+    return tmin + (v - vmin) * (tmax - tmin) / (vmax - vmin)
 
 def random_color():
     r,g,b = [random.uniform(0, 1) for i in range(3)]
+    return [r, g, b, 1.0]
+
+def get_color(v: float, min: float, max: float):
+    r,g,b = [
+        mapv(v, min, max, 0.0, 1.0),
+        0.0, 0.0 ]
     return [r, g, b, 1.0]
 
 def gp2curves():
@@ -204,7 +236,7 @@ def gp2curves():
                         name=f"Curve_{name}",
                         matrix_world=obj_matrix_world,
                         coords=cs,
-                        # vcs,
+                        # vertex_colors=vcs,
                         radiuses=thicknesses,
                         context=bpy.context)
 
@@ -213,8 +245,8 @@ def gp2curves():
                     meshObj = convertCurveToMesh(curveObj=curveObj, context=bpy.context)
                     selectObject(meshObj)
 
-                    color_to_vertices(meshObj)
-                    # color_to_vertices(color=RGB)
+                    # color_to_vertices(meshObj)
+                    color_to_vertices_from_gp(meshObj, vcs)
 
     return last_ret
 
