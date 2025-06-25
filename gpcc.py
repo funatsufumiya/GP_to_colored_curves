@@ -274,6 +274,9 @@ def gp2curves(convert_to_meshes: bool, with_radius: bool, caller: Operator | Non
                 # else:
                 #     warn(f"No GP frame matches current frame {frame_current} in layer {layer.name}")
                 continue
+
+            # use the last frame before current frame
+            frames_match.sort(key=lambda f: f.frame_number, reverse=True)
         
         frame = frames_match[0]
 
