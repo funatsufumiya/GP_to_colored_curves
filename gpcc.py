@@ -234,13 +234,17 @@ def gp2curves(convert_to_meshes: bool, with_radius: bool, caller: Operator | Non
 
     while should_retry():
         layer_id = try_count
+        if layer_id >= len(layers):
+            warn("No valid GP Layers found")
+            return break_ret
+
         layer = layers[layer_id]
         if len(layer.frames) == 0:
             if should_retry():
                 try_count += 1
                 continue
             else:
-                warn("No GP_Layers found")
+                warn("No GP_Layers found matches current frame")
                 return break_ret
         
         frames_match = list(filter(lambda f: f.frame_number == frame_current, layer.frames))
