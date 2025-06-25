@@ -224,37 +224,44 @@ def gp2curves(convert_to_meshes: bool, with_radius: bool, caller: Operator | Non
         warn("No GP_Layers found")
         return break_ret
     
-    # FIXME: should also consider other layers
-    try_count = 0
-    try_limit = 3
-    layer_id = 0
+    # # FIXME: should also consider other layers
+    # try_count = 0
+    # try_limit = 3
+    # layer_id = 0
 
-    def should_retry():
-        return try_count < try_limit
+    # def should_retry():
+    #     return try_count < try_limit
 
-    while should_retry():
-        layer_id = try_count
-        if layer_id >= len(layers):
-            warn("No valid GP Layers found")
-            return break_ret
+    # while should_retry():
+    #     layer_id = try_count
+    #     if layer_id >= len(layers):
+    #         warn("No valid GP Layers found")
+    #         return break_ret
 
-        layer = layers[layer_id]
+    #     layer = layers[layer_id]
+
+    valid_layer_found = False
+
+    for layer in layers:
         if len(layer.frames) == 0:
-            if should_retry():
-                try_count += 1
-                continue
-            else:
-                warn("No GP_Layers found matches current frame")
-                return break_ret
+            # if should_retry():
+            #     try_count += 1
+            #     continue
+            # else:
+            #     warn("No GP_Layers found matches current frame")
+            #     return break_ret
+            continue
         
         frames_match = list(filter(lambda f: f.frame_number == frame_current, layer.frames))
+
         if len(frames_match) == 0:
-            if should_retry():
-                try_count += 1
-                continue
-            else:
-                warn("No GP frame matches")
-                return break_ret
+        #     if should_retry():
+        #         try_count += 1
+        #         continue
+        #     else:
+        #         warn("No GP frame matches")
+        #         return break_ret
+            continue
         
         frame = frames_match[0]
 
@@ -266,14 +273,17 @@ def gp2curves(convert_to_meshes: bool, with_radius: bool, caller: Operator | Non
             strokes = drawing.strokes
 
         if len(strokes) == 0:
-            if should_retry():
-                try_count += 1
-                continue
-            else:
-                caller.report({'WARNING'}, "No GP strokes found")
-                return break_ret
+            # if should_retry():
+            #     try_count += 1
+            #     continue
+            # else:
+            #     caller.report({'WARNING'}, "No GP strokes found")
+            #     return break_ret
+            continue
 
         for stroke in strokes:
+            valid_layer_found = True
+
             if is_gpv2:
                 cs = [p.co for p in stroke.points.values()]
                 vcs = [p.vertex_color for p in stroke.points.values()]
@@ -315,8 +325,9 @@ def gp2curves(convert_to_meshes: bool, with_radius: bool, caller: Operator | Non
 
         return last_ret
     
-    warn("No valid GP layer found")
-    return break_ret
+    if not valid_layer_found:
+        warn("No valid GP layer found")
+        return break_ret
 
 class GPCC_OT_ConvertGP2Meshes(bpy.types.Operator):
 
