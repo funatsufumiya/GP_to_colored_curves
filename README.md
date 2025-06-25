@@ -18,7 +18,7 @@ On Blender 4.3+ you can also try Geometry Nodes named [Grease Pencil to Curves N
 
 ## Install
 
-Download whole code from GitHub's "Download ZIP" menu, and rename it to "GP to Colored Curves.zip", then drop it into Blender.
+Download whole code from GitHub's "Download ZIP" menu, and rename it to `GP_to_colored_curves.zip`, then drop it into Blender.
 
 - or check [Releases](https://github.com/funatsufumiya/GP_to_colored_curves/releases) and download ZIP files from there. (This may be older than latest, but maybe more stable.)
 
