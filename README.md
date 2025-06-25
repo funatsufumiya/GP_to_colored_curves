@@ -26,6 +26,8 @@ Download whole code from GitHub's "Download ZIP" menu, and rename it to "GP to C
 - Execute a menu command at `Object > GP to Colored Curves > GP to Meshes (with vertex-color)`.
     - (You can also directly call it from F3 search menu, or make it favorite by right-click, or add shortcut-key ...etc).
 
+![docs/screenshot_menu.png](docs/screenshot_menu.png)
+
 ## Preferences
 
 - You can adjust `thickness_factor` in addon preferences. This is multiplication factor for curve radius.
