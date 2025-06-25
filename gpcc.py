@@ -202,6 +202,7 @@ def gp2curves(convert_to_meshes: bool, with_radius: bool, caller: Operator | Non
     sels = bpy.context.selected_objects
 
     if len(sels) < 1:
+        warn("No GP object selected")
         return break_ret
     
     sel = sels[0]
