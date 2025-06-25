@@ -24,7 +24,7 @@ On Blender 4.3+ you can also try Geometry Nodes named [Grease Pencil to Curves N
 
 [![GitHub Latest Release)](https://img.shields.io/github/v/release/funatsufumiya/GP_to_colored_curves?logo=github)](https://github.com/funatsufumiya/GP_to_colored_curves/releases)
 
-Check [Releases](https://github.com/funatsufumiya/GP_to_colored_curves/releases) and download ZIP files from there. (This may be older than latest, but maybe more stable.)
+Check [Releases](https://github.com/funatsufumiya/GP_to_colored_curves/releases) and download ZIP files from there. (This may be older than latest, but maybe more stable.) Then drop it into Blender.
 
 ### From nightly (main branch, latest)
 
