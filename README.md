@@ -1,5 +1,7 @@
 # GP to Colored Curves
 
+![GitHub Latest Release)](https://img.shields.io/github/v/release/funatsufumiya/GP_to_colored_curves?logo=github)
+
 Blender addon (Python script), Convert grease pencil (GP) into colored curves (meshes).
 
 - GP's vertex-color, alpha/opacity (strength) and radius (thickness) are applied on converted meshes (**WARNING**: vertex-color and opacity are ONLY applied on meshes, not curves.)
