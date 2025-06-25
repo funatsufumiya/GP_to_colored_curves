@@ -30,6 +30,8 @@ Download whole code from GitHub's "Download ZIP" menu, and rename it to "GP to C
 
 - You can adjust `thickness_factor` in addon preferences. This is multiplication factor for curve radius.
 
+![docs/screenshot_pref.png](docs/screenshot_pref.png)
+
 ## Known Issues
 
 - Generated meshes have vertex colors (with alpha), but would not shown colors as default. You should create proper shader node for it (using `Color Attribute` node.)
