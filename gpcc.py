@@ -264,7 +264,16 @@ def gp2curves(convert_to_meshes: bool, with_radius: bool, caller: Operator | Non
         #     else:
         #         warn("No GP frame matches")
         #         return break_ret
-            continue
+
+            # if doesn't match current frame, use the nearest frame previous to current frame
+            frames_match = list(filter(lambda f: f.frame_number < frame_current, layer.frames))
+            if len(frames_match) == 0:
+                # if should_retry():
+                #     try_count += 1
+                #     continue
+                # else:
+                #     warn(f"No GP frame matches current frame {frame_current} in layer {layer.name}")
+                continue
         
         frame = frames_match[0]
 
