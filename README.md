@@ -42,7 +42,7 @@ Download whole code from GitHub's ["Code > Download ZIP"](https://github.com/fun
     - Shader Nodes example: ![docs/screenshot_sn_attribute.png](docs/screenshot_sn_attribute.png)
 - Radius(es) may bigger or smaller because of unit difference (pixels and meters, on Blender 4.2 LTS)
     - Multiplication factor (`thickness_factor`) can be adjusted in addon preferences.
-- Not all GP_Layers are considered. (Currently checking only first layer. This would ***NOT*** be fixed soon, you can fork the code and modify them.) 
+- Not all GP_Layers are considered. (Currently checking only first found layer which has strokes. This would ***NOT*** be fixed soon, you can fork the code and modify them.) 
 - Only strokes are supported. ***NOT*** fills for now.
 
 ## TODOs

@@ -225,70 +225,94 @@ def gp2curves(convert_to_meshes: bool, with_radius: bool, caller: Operator | Non
         return break_ret
     
     # FIXME: should also consider other layers
-    layer = layers[0]
-    if len(layer.frames) == 0:
-        warn("No GP_Layers found")
-        return break_ret
-    
-    frames_match = list(filter(lambda f: f.frame_number == frame_current, layer.frames))
-    if len(frames_match) == 0:
-        warn("No GP frame matches")
-        return break_ret
-    
-    frame = frames_match[0]
+    try_count = 0
+    try_limit = 3
+    layer_id = 0
 
-    if is_gpv2:
-        strokes = frame.strokes.values()
-    elif is_gpv3:
-        drawing = frame.drawing
-        # FIXME: should use attributes instead of strokes for performance
-        strokes = drawing.strokes
+    def should_retry():
+        return try_count < try_limit
 
-    if len(strokes) == 0:
-        caller.report({'WARNING'}, "No GP strokes found")
-        return break_ret
+    while should_retry():
+        layer_id = try_count
+        layer = layers[layer_id]
+        if len(layer.frames) == 0:
+            if should_retry():
+                try_count += 1
+                continue
+            else:
+                warn("No GP_Layers found")
+                return break_ret
+        
+        frames_match = list(filter(lambda f: f.frame_number == frame_current, layer.frames))
+        if len(frames_match) == 0:
+            if should_retry():
+                try_count += 1
+                continue
+            else:
+                warn("No GP frame matches")
+                return break_ret
+        
+        frame = frames_match[0]
 
-    for stroke in strokes:
         if is_gpv2:
-            cs = [p.co for p in stroke.points.values()]
-            vcs = [p.vertex_color for p in stroke.points.values()]
-            alphas = [p.strength for p in stroke.points.values()]
-            pressures = [p.pressure for p in stroke.points.values()]
-            thickness_factor_gpv2 = get_thickness_factor_gpv2()
-            thicknesses = np.array(pressures) * float(stroke.line_width) * thickness_factor_gpv2
+            strokes = frame.strokes.values()
         elif is_gpv3:
-            # NOTE: for undocumented classes, see
-            # https://projects.blender.org/blender/blender/issues/126610
+            drawing = frame.drawing
+            # FIXME: should use attributes instead of strokes for performance
+            strokes = drawing.strokes
 
-            cs = [p.position for p in stroke.points]
-            vcs = [p.vertex_color for p in stroke.points]
-            alphas = [p.opacity for p in stroke.points]
-            radiuses = [p.radius for p in stroke.points]
-            thickness_factor_gpv3 = get_thickness_factor_gpv3()
-            thicknesses = np.array(radiuses) * thickness_factor_gpv3
+        if len(strokes) == 0:
+            if should_retry():
+                try_count += 1
+                continue
+            else:
+                caller.report({'WARNING'}, "No GP strokes found")
+                return break_ret
 
-        if with_radius:
-            radiuses = thicknesses
-        else:
-            radiuses = None
+        for stroke in strokes:
+            if is_gpv2:
+                cs = [p.co for p in stroke.points.values()]
+                vcs = [p.vertex_color for p in stroke.points.values()]
+                alphas = [p.strength for p in stroke.points.values()]
+                pressures = [p.pressure for p in stroke.points.values()]
+                thickness_factor_gpv2 = get_thickness_factor_gpv2()
+                thicknesses = np.array(pressures) * float(stroke.line_width) * thickness_factor_gpv2
+            elif is_gpv3:
+                # NOTE: for undocumented classes, see
+                # https://projects.blender.org/blender/blender/issues/126610
 
-        curveObj = make_curves(
-            name=f"Curve_{name}",
-            matrix_world=obj_matrix_world,
-            coords=cs,
-            # vertex_colors=vcs,
-            radiuses=radiuses,
-            context=bpy.context)
+                cs = [p.position for p in stroke.points]
+                vcs = [p.vertex_color for p in stroke.points]
+                alphas = [p.opacity for p in stroke.points]
+                radiuses = [p.radius for p in stroke.points]
+                thickness_factor_gpv3 = get_thickness_factor_gpv3()
+                thicknesses = np.array(radiuses) * thickness_factor_gpv3
 
-        if convert_to_meshes:
-            meshObj = convertCurveToMesh(curveObj=curveObj, context=bpy.context)
-            selectObject(meshObj)
+            if with_radius:
+                radiuses = thicknesses
+            else:
+                radiuses = None
 
-            color_to_vertices_from_gp(meshObj, vcs, alphas)
-        else:
-            selectObject(curveObj)
+            curveObj = make_curves(
+                name=f"Curve_{name}",
+                matrix_world=obj_matrix_world,
+                coords=cs,
+                # vertex_colors=vcs,
+                radiuses=radiuses,
+                context=bpy.context)
 
-    return last_ret
+            if convert_to_meshes:
+                meshObj = convertCurveToMesh(curveObj=curveObj, context=bpy.context)
+                selectObject(meshObj)
+
+                color_to_vertices_from_gp(meshObj, vcs, alphas)
+            else:
+                selectObject(curveObj)
+
+        return last_ret
+    
+    warn("No valid GP layer found")
+    return break_ret
 
 class GPCC_OT_ConvertGP2Meshes(bpy.types.Operator):
 
