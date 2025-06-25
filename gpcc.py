@@ -219,6 +219,7 @@ def gp2curves(convert_to_meshes: bool, with_radius: bool, caller: Operator | Non
 
     name = sel.data.name
     layers = sel.data.layers
+    generated_objects = []
 
     if len(layers) == 0:
         warn("No GP_Layers found")
@@ -322,12 +323,12 @@ def gp2curves(convert_to_meshes: bool, with_radius: bool, caller: Operator | Non
                 color_to_vertices_from_gp(meshObj, vcs, alphas)
             else:
                 selectObject(curveObj)
-
-        return last_ret
     
     if not valid_layer_found:
         warn("No valid GP layer found")
         return break_ret
+    else:
+        return last_ret
 
 class GPCC_OT_ConvertGP2Meshes(bpy.types.Operator):
 
