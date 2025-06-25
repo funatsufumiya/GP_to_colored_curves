@@ -1,6 +1,6 @@
 # GP to Colored Curves
 
-[![GitHub Latest Release)](https://img.shields.io/github/v/release/funatsufumiya/GP_to_colored_curves?logo=github&v2)](https://github.com/funatsufumiya/GP_to_colored_curves/releases)
+[![GitHub Latest Release)](https://img.shields.io/github/v/release/funatsufumiya/GP_to_colored_curves?logo=github&v3)](https://github.com/funatsufumiya/GP_to_colored_curves/releases)
 
 Blender addon (Python script), Convert grease pencil (GP) into colored curves (meshes).
 
@@ -22,7 +22,7 @@ On Blender 4.3+ you can also try Geometry Nodes named [Grease Pencil to Curves N
 
 ### From Releases (stable)
 
-[![GitHub Latest Release)](https://img.shields.io/github/v/release/funatsufumiya/GP_to_colored_curves?logo=github&v2)](https://github.com/funatsufumiya/GP_to_colored_curves/releases)
+[![GitHub Latest Release)](https://img.shields.io/github/v/release/funatsufumiya/GP_to_colored_curves?logo=github&v3)](https://github.com/funatsufumiya/GP_to_colored_curves/releases)
 
 Check [Releases](https://github.com/funatsufumiya/GP_to_colored_curves/releases) and download ZIP files from there. (This may be older than latest, but maybe more stable.) Then drop it into Blender.
 
