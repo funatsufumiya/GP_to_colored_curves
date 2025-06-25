@@ -77,7 +77,7 @@ def deleteObject(obj: Object):
 
     bpy.ops.object.select_all(action='DESELECT')
      
-    if obj is None:
+    if obj:
         obj.select_set(True)
         bpy.ops.object.delete()
 
