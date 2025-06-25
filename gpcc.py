@@ -74,10 +74,12 @@ def deleteObject(obj: Object):
     sels = bpy.context.selected_objects
     for o in sels:
         o.select_set(False)
-    obj.select_set(True)
-    bpy.ops.object.delete()
-    for o in sels:
-        o.select_set(True)
+
+    bpy.ops.object.select_all(action='DESELECT')
+     
+    if obj is None:
+        obj.select_set(True)
+        bpy.ops.object.delete()
 
 def deselect():
     sels = bpy.context.selected_objects
@@ -321,13 +323,42 @@ def gp2curves(convert_to_meshes: bool, with_radius: bool, caller: Operator | Non
                 selectObject(meshObj)
 
                 color_to_vertices_from_gp(meshObj, vcs, alphas)
+
+                generated_objects.append(meshObj)
             else:
                 selectObject(curveObj)
+                generated_objects.append(curveObj)
     
     if not valid_layer_found:
         warn("No valid GP layer found")
         return break_ret
     else:
+        # join all generated objects
+        if len(generated_objects) > 1:
+            bpy.ops.object.select_all(action='DESELECT')
+            for obj in generated_objects:
+                obj.select_set(True)
+            bpy.context.view_layer.objects.active = generated_objects[0]
+            bpy.ops.object.join()
+
+            # # delete other objects
+            # for obj in generated_objects[1:]:
+            #     if obj:
+            #         try:
+            #             deleteObject(obj)
+            #         except Exception as e:
+            #             pass
+
+        # rename the joined object
+        active_obj = generated_objects[0]
+        if active_obj is not None:
+            if convert_to_meshes:
+                active_obj.name = f"{name}_mesh"
+                active_obj.data.name = f"{name}_mesh_data"
+            else:
+                active_obj.name = f"{name}_curve"
+                active_obj.data.name = f"{name}_curve_data"
+
         return last_ret
 
 class GPCC_OT_ConvertGP2Meshes(bpy.types.Operator):
