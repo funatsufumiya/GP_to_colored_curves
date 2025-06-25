@@ -53,6 +53,7 @@ Download whole code from GitHub's ["Code > Download ZIP"](https://github.com/fun
 - Radius(es) may bigger or smaller because of unit difference (pixels and meters, on Blender 4.2 LTS)
     - Multiplication factor (`thickness_factor`) can be adjusted in addon preferences.
 - Only strokes are supported. ***NOT*** fills for now.
+    - As an workaround, convert to curves without radius and you can manually fill it.
 
 ## TODOs
 
