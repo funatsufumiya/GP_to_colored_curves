@@ -93,6 +93,13 @@ def selectObject(obj: Object, need_deselect=True):
         deselect()
     obj.select_set(True)
 
+
+def selectObjects(lst: List[Object], need_deselect=True):
+    if need_deselect:
+        deselect()
+    for o in lst:
+        o.select_set(True)
+
 def convertCurveToMesh(
         curveObj: Object,
         context: Context
@@ -207,172 +214,153 @@ def gp2curves(convert_to_meshes: bool, with_radius: bool, with_color: bool, call
         warn("No GP object selected")
         return break_ret
     
-    sel = sels[0]
-    obj_matrix_world = sel.matrix_world
-    obj_type = sel.type
+    final_selections = []
+    
+    no_gp = True
+    no_gp_layers = True
+    
+    for sel in sels:
+    
+        # sel = sels[0]
+        obj_matrix_world = sel.matrix_world
+        obj_type = sel.type
 
-    is_gpv3 = (obj_type == "GREASEPENCIL")
-    is_gpv2 = (obj_type == "GPENCIL")
-    is_gp = (is_gpv2 or is_gpv3)
+        is_gpv3 = (obj_type == "GREASEPENCIL")
+        is_gpv2 = (obj_type == "GPENCIL")
+        is_gp = (is_gpv2 or is_gpv3)
 
-    if not is_gp:
+        if not is_gp:
+            # warn("No GP object selected")
+            # return break_ret
+            continue
+        else:
+            no_gp = False
+
+        name = sel.data.name
+        layers = sel.data.layers
+        generated_objects = []
+
+        if len(layers) == 0:
+            # warn("No GP_Layers found")
+            # return break_ret
+            continue
+        else:
+            no_gp_layers = False
+
+        valid_layer_found = False
+
+        for layer in layers:
+            if len(layer.frames) == 0:
+                continue
+            
+            frames_match = list(filter(lambda f: f.frame_number == frame_current, layer.frames))
+
+            if len(frames_match) == 0:
+
+                # if doesn't match current frame, use the nearest frame previous to current frame
+                frames_match = list(filter(lambda f: f.frame_number < frame_current, layer.frames))
+                if len(frames_match) == 0:
+                    continue
+
+                # use the last frame before current frame
+                frames_match.sort(key=lambda f: f.frame_number, reverse=True)
+            
+            frame = frames_match[0]
+
+            if is_gpv2:
+                strokes = frame.strokes.values()
+            elif is_gpv3:
+                drawing = frame.drawing
+                # FIXME: should use attributes instead of strokes for performance
+                strokes = drawing.strokes
+
+            if len(strokes) == 0:
+                continue
+
+            for stroke in strokes:
+                valid_layer_found = True
+
+                if is_gpv2:
+                    cs = [p.co for p in stroke.points.values()]
+                    vcs = [p.vertex_color for p in stroke.points.values()]
+                    alphas = [p.strength for p in stroke.points.values()]
+                    pressures = [p.pressure for p in stroke.points.values()]
+                    thickness_factor_gpv2 = get_thickness_factor_gpv2()
+                    thicknesses = np.array(pressures) * float(stroke.line_width) * thickness_factor_gpv2
+                elif is_gpv3:
+                    # NOTE: for undocumented classes, see
+                    # https://projects.blender.org/blender/blender/issues/126610
+
+                    cs = [p.position for p in stroke.points]
+                    vcs = [p.vertex_color for p in stroke.points]
+                    alphas = [p.opacity for p in stroke.points]
+                    radiuses = [p.radius for p in stroke.points]
+                    thickness_factor_gpv3 = get_thickness_factor_gpv3()
+                    thicknesses = np.array(radiuses) * thickness_factor_gpv3
+
+                if with_radius:
+                    radiuses = thicknesses
+                else:
+                    radiuses = None
+
+                curveObj = make_curves(
+                    name=f"Curve_{name}",
+                    matrix_world=obj_matrix_world,
+                    coords=cs,
+                    # vertex_colors=vcs,
+                    radiuses=radiuses,
+                    context=bpy.context)
+
+                if convert_to_meshes:
+                    meshObj = convertCurveToMesh(curveObj=curveObj, context=bpy.context)
+                    selectObject(meshObj)
+
+                    if with_color:
+                        color_to_vertices_from_gp(meshObj, vcs, alphas)
+
+                    generated_objects.append(meshObj)
+                else:
+                    selectObject(curveObj)
+                    generated_objects.append(curveObj)
+        
+        if not valid_layer_found:
+            warn("No valid GP layer found")
+            # return break_ret
+        else:
+            # join all generated objects
+            if len(generated_objects) > 1:
+                bpy.ops.object.select_all(action='DESELECT')
+                for obj in generated_objects:
+                    obj.select_set(True)
+                bpy.context.view_layer.objects.active = generated_objects[0]
+                bpy.ops.object.join()
+
+            # rename the joined object
+            active_obj = generated_objects[0]
+            if active_obj is not None:
+                if convert_to_meshes:
+                    active_obj.name = f"{name}_mesh"
+                    active_obj.data.name = f"{name}_mesh_data"
+                else:
+                    active_obj.name = f"{name}_curve"
+                    active_obj.data.name = f"{name}_curve_data"
+
+                final_selections.append(active_obj)
+
+            # return last_ret
+
+    if no_gp:
         warn("No GP object selected")
         return break_ret
-
-    name = sel.data.name
-    layers = sel.data.layers
-    generated_objects = []
-
-    if len(layers) == 0:
+    
+    if no_gp_layers:
         warn("No GP_Layers found")
         return break_ret
     
-    # # FIXME: should also consider other layers
-    # try_count = 0
-    # try_limit = 3
-    # layer_id = 0
+    if len(final_selections) > 0:
+        selectObjects(final_selections)
 
-    # def should_retry():
-    #     return try_count < try_limit
-
-    # while should_retry():
-    #     layer_id = try_count
-    #     if layer_id >= len(layers):
-    #         warn("No valid GP Layers found")
-    #         return break_ret
-
-    #     layer = layers[layer_id]
-
-    valid_layer_found = False
-
-    for layer in layers:
-        if len(layer.frames) == 0:
-            # if should_retry():
-            #     try_count += 1
-            #     continue
-            # else:
-            #     warn("No GP_Layers found matches current frame")
-            #     return break_ret
-            continue
-        
-        frames_match = list(filter(lambda f: f.frame_number == frame_current, layer.frames))
-
-        if len(frames_match) == 0:
-        #     if should_retry():
-        #         try_count += 1
-        #         continue
-        #     else:
-        #         warn("No GP frame matches")
-        #         return break_ret
-
-            # if doesn't match current frame, use the nearest frame previous to current frame
-            frames_match = list(filter(lambda f: f.frame_number < frame_current, layer.frames))
-            if len(frames_match) == 0:
-                # if should_retry():
-                #     try_count += 1
-                #     continue
-                # else:
-                #     warn(f"No GP frame matches current frame {frame_current} in layer {layer.name}")
-                continue
-
-            # use the last frame before current frame
-            frames_match.sort(key=lambda f: f.frame_number, reverse=True)
-        
-        frame = frames_match[0]
-
-        if is_gpv2:
-            strokes = frame.strokes.values()
-        elif is_gpv3:
-            drawing = frame.drawing
-            # FIXME: should use attributes instead of strokes for performance
-            strokes = drawing.strokes
-
-        if len(strokes) == 0:
-            # if should_retry():
-            #     try_count += 1
-            #     continue
-            # else:
-            #     caller.report({'WARNING'}, "No GP strokes found")
-            #     return break_ret
-            continue
-
-        for stroke in strokes:
-            valid_layer_found = True
-
-            if is_gpv2:
-                cs = [p.co for p in stroke.points.values()]
-                vcs = [p.vertex_color for p in stroke.points.values()]
-                alphas = [p.strength for p in stroke.points.values()]
-                pressures = [p.pressure for p in stroke.points.values()]
-                thickness_factor_gpv2 = get_thickness_factor_gpv2()
-                thicknesses = np.array(pressures) * float(stroke.line_width) * thickness_factor_gpv2
-            elif is_gpv3:
-                # NOTE: for undocumented classes, see
-                # https://projects.blender.org/blender/blender/issues/126610
-
-                cs = [p.position for p in stroke.points]
-                vcs = [p.vertex_color for p in stroke.points]
-                alphas = [p.opacity for p in stroke.points]
-                radiuses = [p.radius for p in stroke.points]
-                thickness_factor_gpv3 = get_thickness_factor_gpv3()
-                thicknesses = np.array(radiuses) * thickness_factor_gpv3
-
-            if with_radius:
-                radiuses = thicknesses
-            else:
-                radiuses = None
-
-            curveObj = make_curves(
-                name=f"Curve_{name}",
-                matrix_world=obj_matrix_world,
-                coords=cs,
-                # vertex_colors=vcs,
-                radiuses=radiuses,
-                context=bpy.context)
-
-            if convert_to_meshes:
-                meshObj = convertCurveToMesh(curveObj=curveObj, context=bpy.context)
-                selectObject(meshObj)
-
-                if with_color:
-                    color_to_vertices_from_gp(meshObj, vcs, alphas)
-
-                generated_objects.append(meshObj)
-            else:
-                selectObject(curveObj)
-                generated_objects.append(curveObj)
-    
-    if not valid_layer_found:
-        warn("No valid GP layer found")
-        return break_ret
-    else:
-        # join all generated objects
-        if len(generated_objects) > 1:
-            bpy.ops.object.select_all(action='DESELECT')
-            for obj in generated_objects:
-                obj.select_set(True)
-            bpy.context.view_layer.objects.active = generated_objects[0]
-            bpy.ops.object.join()
-
-            # # delete other objects
-            # for obj in generated_objects[1:]:
-            #     if obj:
-            #         try:
-            #             deleteObject(obj)
-            #         except Exception as e:
-            #             pass
-
-        # rename the joined object
-        active_obj = generated_objects[0]
-        if active_obj is not None:
-            if convert_to_meshes:
-                active_obj.name = f"{name}_mesh"
-                active_obj.data.name = f"{name}_mesh_data"
-            else:
-                active_obj.name = f"{name}_curve"
-                active_obj.data.name = f"{name}_curve_data"
-
-        return last_ret
+    return last_ret
 
 class GPCC_OT_ConvertGP2Meshes(bpy.types.Operator):
 
