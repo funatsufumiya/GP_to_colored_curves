@@ -183,7 +183,7 @@ def get_thickness_factor_gpv3():
     except Exception:
         return 100.0
 
-def gp2curves(convert_to_meshes: bool, with_radius: bool, caller: Operator | None):
+def gp2curves(convert_to_meshes: bool, with_radius: bool, with_color: bool, caller: Operator | None):
     break_ret = {'CANCELLED'}
     last_ret = {'FINISHED'}
 
@@ -334,7 +334,8 @@ def gp2curves(convert_to_meshes: bool, with_radius: bool, caller: Operator | Non
                 meshObj = convertCurveToMesh(curveObj=curveObj, context=bpy.context)
                 selectObject(meshObj)
 
-                color_to_vertices_from_gp(meshObj, vcs, alphas)
+                if with_color:
+                    color_to_vertices_from_gp(meshObj, vcs, alphas)
 
                 generated_objects.append(meshObj)
             else:
@@ -381,7 +382,17 @@ class GPCC_OT_ConvertGP2Meshes(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        return gp2curves(convert_to_meshes=True, with_radius=True, caller=self)
+        return gp2curves(convert_to_meshes=True, with_radius=True, with_color=True, caller=self)
+    
+class GPCC_OT_ConvertGP2MeshesWithoutColor(bpy.types.Operator):
+
+    bl_idname = f"{addon_id_s}.convert_gp_to_meshes_without_color"
+    bl_label = "GP to Meshes (without vertex-color)"
+    bl_description = "Convert grease pencil (GP) into colored curved meshes without vertex-color, with radius, opacity"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        return gp2curves(convert_to_meshes=True, with_radius=True, with_color=False, caller=self)
     
 class GPCC_OT_ConvertGP2Curves(bpy.types.Operator):
 
@@ -391,7 +402,7 @@ class GPCC_OT_ConvertGP2Curves(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        return gp2curves(convert_to_meshes=False, with_radius=True, caller=self)
+        return gp2curves(convert_to_meshes=False, with_radius=True, with_color=False, caller=self)
     
 class GPCC_OT_ConvertGP2CurvesWithoutRadius(bpy.types.Operator):
 
@@ -401,7 +412,7 @@ class GPCC_OT_ConvertGP2CurvesWithoutRadius(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        return gp2curves(convert_to_meshes=False, with_radius=False, caller=self)
+        return gp2curves(convert_to_meshes=False, with_radius=False, with_color=False, caller=self)
 
 
 class GPCC_MT_SubMenu(bpy.types.Menu):
@@ -411,5 +422,6 @@ class GPCC_MT_SubMenu(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
         layout.operator(GPCC_OT_ConvertGP2Meshes.bl_idname)
+        layout.operator(GPCC_OT_ConvertGP2MeshesWithoutColor.bl_idname)
         layout.operator(GPCC_OT_ConvertGP2Curves.bl_idname)
         layout.operator(GPCC_OT_ConvertGP2CurvesWithoutRadius.bl_idname)

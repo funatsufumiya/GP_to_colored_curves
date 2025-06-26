@@ -1,7 +1,7 @@
 bl_info = {
     "name": "GP to Colored Curves",
     "author": "Fumiya Funatsu",
-    "version": (0, 1, 13),
+    "version": (0, 1, 14),
     "blender": (2, 80, 0),
     "description": "Convert grease pencil (GP) into colored curves (meshes)",
     "category": "Object"
@@ -67,12 +67,14 @@ class GPCCAddonPreferences(bpy.types.AddonPreferences):
 reset_btn = GPCC_OT_ResetPrefs
 pref = GPCCAddonPreferences
 gp2meshes = gpcc.GPCC_OT_ConvertGP2Meshes
+gp2meshes_without_color = gpcc.GPCC_OT_ConvertGP2MeshesWithoutColor
 gp2curves = gpcc.GPCC_OT_ConvertGP2Curves
 gp2curves_without_radius = gpcc.GPCC_OT_ConvertGP2CurvesWithoutRadius
 submenu = gpcc.GPCC_MT_SubMenu
 
 classes = [
     gp2meshes,
+    gp2meshes_without_color,
     gp2curves,
     gp2curves_without_radius,
     submenu,
